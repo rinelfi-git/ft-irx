@@ -2,31 +2,35 @@
 # define IRCSERVER_HPP
 # include <string>
 # include <iostream>
-# include <ASocketServerObserver.hpp>
+# include <map>
+# include "ASocketServerObserver.hpp"
 
 class	User;
 class	UserInfo;
 class	ASocketClient;
 class	Channel;
+class	Pending;
 
 class IRCServer: public ASocketServerObserver
 {
     private:
-        std::string     	_password;
-        int             	_port;
+        std::string	_password;
+		std::map<int, Pending*>	_pendings;
+		std::map<std::string, User*>	_users;
+		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;
         void	_createUser(UserInfo info, ASocketClient socket);
         void	_createChannel(User first, std::string name);
     public:
-        static IRCServer& getInstance();
-        IRCServer(int port, const std::string& password);
+        static IRCServer& getInstance(void);
+        IRCServer(const std::string& password);
         ~IRCServer();
-        void			joinChannel(User user, std::string name);
-        void			auth(UserInfo user, std::string password);
-        User*			user(std::string nick);
-        Channel*		channel(std::string name);
-		virtual void	onConnection(int fd);
+        void			joinChannel(const User& user, const std::string& name);
+        void			auth(const UserInfo& user, const std::string& password);
+        User*			user(const std::string& nick) const;
+        Channel*		channel(const std::string& name) const;
+		virtual void	onConnect(int fd);
 		virtual void	onData(int fd, const std::string& data);
-		virtual void	onDisconnection(int fd);
+		virtual void	onDisconnect(int fd);
 };
 #endif

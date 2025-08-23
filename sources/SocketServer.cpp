@@ -55,6 +55,7 @@ void	SocketServer::attachObserver(ASocketServerObserver* observer)
 	std::vector<ASocketServerObserver*>::iterator	foundPtr(std::find(_observers.begin(), _observers.end(), observer));
 	if (foundPtr != _observers.end())
 		return ;
+	observer->bind(this);
 	_observers.push_back(observer);
 }
 
@@ -116,7 +117,7 @@ void	SocketServer::_acceptClient(void)
 	client.events = POLLIN;
 	client.revents = 0;
 	for (size_t j(0); j < _observers.size(); j++)
-		_observers[j]->onConnection(fd);
+		_observers[j]->onConnect(fd);
 	std::cout << "NEW CONNECTION << " << fd << std::endl;
 	_polls.push_back(client);
 }

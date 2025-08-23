@@ -5,6 +5,7 @@ SRC_DIR = sources
 OBJ_DIR = objects
 SRCs = \
 	abstract/ASocketServerObserver.cpp \
+	IRCServer.cpp \
 	SocketServer.cpp
 OBJ_PATH = $(addprefix $(OBJ_DIR)/,$(SRCs:.cpp=.o))
 SRC_PATH = $(addprefix $(SRC_DIR)/,$(SRCs))

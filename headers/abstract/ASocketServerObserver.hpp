@@ -7,13 +7,14 @@ class	SocketServer;
 class	ASocketServerObserver
 {
 private:
-	SocketServer&	_observable;
+	SocketServer*	_observable;
 public:
-	ASocketServerObserver(SocketServer& observable);
+	ASocketServerObserver(void);
 	virtual ~ASocketServerObserver();
-	virtual void	onConnection(int fd) = 0;
+	virtual void	onConnect(int fd) = 0;
 	virtual void	onData(int fd, const std::string& data) = 0;
 	virtual void	onDisconnect(int fd) = 0;
+	void			bind(SocketServer* observable);
 	SocketServer&	observable(void) const;
 };
 #endif
