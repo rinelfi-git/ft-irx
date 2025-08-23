@@ -78,6 +78,12 @@ void	SocketServer::start(void)
 			const struct pollfd currentPoll = _polls[i];
 			if (currentPoll.fd == _fd && (currentPoll.revents & POLLIN))
 				_acceptClient();
+			else if (currentPoll.revents & POLLIN)
+			{
+				const bool	handled(_handleClient(i));
+				if (!handled)
+					i--;
+			}
 		}
 	}
 }
@@ -112,9 +118,38 @@ void	SocketServer::_acceptClient(void)
 	for (size_t j(0); j < _observers.size(); j++)
 		_observers[j]->onConnection(fd);
 	std::cout << "NEW CONNECTION << " << fd << std::endl;
+	_polls.push_back(client);
 }
 
-void	SocketServer::_handleClient(int fd)
+bool	SocketServer::_handleClient(int index)
 {
-	(void)fd;
+	char		buffer[SOCKET_READ_BUFFER];
+	const int	fd(_polls[index].fd);
+	const int	read(recv(fd, buffer, SOCKET_READ_BUFFER, 0));	
+
+	if (read > 0)
+	{
+		buffer[read] = 0;
+		for(size_t j(0); j < _observers.size(); j++)
+			_observers[j]->onData(fd, std::string(buffer));
+	}
+	else if (read == 0)
+	{
+		for(size_t j(0); j < _observers.size(); j++)
+			_observers[j]->onDisconnect(fd);
+		::close(fd);
+		_polls.erase(_polls.begin() + index);
+		std::cout << "DISCONNECTION >> " << fd << std::endl;
+	}
+	else
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			return (true);
+		for(size_t j(0); j < _observers.size(); j++)
+			_observers[j]->onDisconnect(fd);
+		::close(fd);
+		_polls.erase(_polls.begin() + index);
+		std::cout << "DISCONNECTION >> " << fd << std::endl;
+	}
+	return (read);
 }

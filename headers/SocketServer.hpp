@@ -14,7 +14,7 @@ private:
 	std::vector<struct pollfd> _polls;
 	std::vector<ASocketServerObserver*>	_observers;
 	void	_acceptClient(void);
-	void	_handleClient(int fd);
+	bool	_handleClient(int fd);
 public:
 	SocketServer(int portIn);
 	~SocketServer();
