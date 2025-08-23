@@ -1,9 +1,10 @@
 
 #ifndef SOCKETSERVER_HPP
-#define SOCKETSERVER_HPP
-
-#include <vector>
-#include "ASocketServerObserver.hpp"
+# define SOCKETSERVER_HPP
+# define SOCKET_READ_BUFFER 512
+# include <vector>
+# include <poll.h>
+# include "ASocketServerObserver.hpp"
 
 class SocketServer
 {
@@ -11,13 +12,15 @@ private:
 	int _fd;
 	bool _running;
 	std::vector<struct pollfd> _polls;
+	std::vector<ASocketServerObserver*>	_observers;
+	void	_acceptClient(void);
+	void	_handleClient(int fd);
 public:
 	SocketServer(int portIn);
 	~SocketServer();
-	ASocketServerObserver *attachObserver(ASocketServerObserver *observerIn);
-	ASocketServerObserver *detachObserver(ASocketServerObserver *observerIn);
-	ASocketServerObserver *start();
-	ASocketServerObserver *stop();
+	void	attachObserver(ASocketServerObserver *observerIn);
+	void	detachObserver(ASocketServerObserver *observerIn);
+	void	start(void);
+	void	stop(void);
 };
-
 #endif
