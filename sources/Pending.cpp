@@ -16,7 +16,7 @@ Pending::~Pending()
 bool	Pending::auth(void)
 {}
 
-void	Pending::parse(const map<std::string, std::string>& cmds)
+void	Pending::parse(const std::map<std::string, std::string>& cmds)
 {}
 
 void	Pending::_parseNick(const std::string& in)
