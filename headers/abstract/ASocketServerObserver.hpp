@@ -14,5 +14,6 @@ public:
 	virtual void	onConnection(int fd) = 0;
 	virtual void	onData(int fd, const std::string& data) = 0;
 	virtual void	onDisconnect(int fd) = 0;
+	SocketServer&	observable(void) const;
 };
 #endif

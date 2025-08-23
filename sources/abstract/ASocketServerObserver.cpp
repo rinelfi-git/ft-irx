@@ -7,3 +7,8 @@ ASocketObserver::ASocketObserver(SocketServer& observable): _observable(observab
 
 ASocketObserver::~ASocketObserver()
 {}
+
+SocketServer	ASocketObserver::observable(void) const
+{
+	return (_observable);
+}
