@@ -55,7 +55,6 @@ void	SocketServer::attachObserver(ASocketServerObserver* observer)
 	std::vector<ASocketServerObserver*>::iterator	foundPtr(std::find(_observers.begin(), _observers.end(), observer));
 	if (foundPtr != _observers.end())
 		return ;
-	observer->bind(this);
 	_observers.push_back(observer);
 }
 

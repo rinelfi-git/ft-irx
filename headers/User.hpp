@@ -1,7 +1,8 @@
 #ifndef USER_HPP
-#define USER_HPP
+# define USER_HPP
+# include "UserInfo.hpp"
 
-#include "UserInfo.hpp"
+class	ASocketClient;
 
 class User
 {
@@ -12,7 +13,7 @@ class User
 		~User();
 		std::string	networkld(void);
 		User	*message(Message message);
-		User	*connect(AsocketClient *socket);
+		User	*connect(ASocketClient* socket);
 		User	*disconnect(void);
 };
 

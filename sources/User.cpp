@@ -1,4 +1,5 @@
-#include "../headers/User.hpp"
+#include "User.hpp"
+#include "Message.hpp"
 
 User		*User::message(Message message)
 {
@@ -10,7 +11,7 @@ std::string	User::networkld(void)
 	return ("std::string	User::networkld(void)");
 }
 
-User		*User::connect(AsocketClient *socket)
+User		*User::connect(ASocketClient *socket)
 {
 	return (this);
 }

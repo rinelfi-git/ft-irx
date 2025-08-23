@@ -6,6 +6,7 @@
 #include "UserInfo.hpp"
 #include <string>
 #include <stdexcept>
+#include <iostream>
 
 IRCServer* IRCServer::_instance = NULL;
 
@@ -62,15 +63,18 @@ Channel*	IRCServer::channel(const std::string& name) const
 void	IRCServer::onConnect(int fd)
 {
 	(void)fd;
+	std::cout << "Connect event" << std::endl;
 }
 
 void	IRCServer::onData(int fd, const std::string& data)
 {
 	(void)fd;
 	(void)data;
+	std::cout << "Data event" << std::endl;
 }
 
 void	IRCServer::onDisconnect(int fd)
 {
 	(void)fd;
+	std::cout << "Disconnect event" << std::endl;
 }

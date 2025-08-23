@@ -6,7 +6,8 @@ OBJ_DIR = objects
 SRCs = \
 	abstract/ASocketServerObserver.cpp \
 	IRCServer.cpp \
-	SocketServer.cpp
+	SocketServer.cpp \
+	test.cpp
 OBJ_PATH = $(addprefix $(OBJ_DIR)/,$(SRCs:.cpp=.o))
 SRC_PATH = $(addprefix $(SRC_DIR)/,$(SRCs))
 INCLUDE_PATH = -I./headers -I./headers/abstract
