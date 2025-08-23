@@ -15,8 +15,8 @@ class IRCServer: public ASocketServerObserver
         std::string     	_password;
         int             	_port;
 		static IRCServer*	_instance;
-        void	createUser(UserInfo info, ASocketClient socket);
-        void	createChannel(User first, std::string name);
+        void	_createUser(UserInfo info, ASocketClient socket);
+        void	_createChannel(User first, std::string name);
     public:
         static IRCServer& getInstance();
         IRCServer(int port, const std::string& password);
@@ -29,5 +29,4 @@ class IRCServer: public ASocketServerObserver
 		virtual void	onData(int fd, const std::string& data);
 		virtual void	onDisconnection(int fd);
 };
-
 #endif
