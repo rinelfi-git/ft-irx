@@ -1,17 +1,23 @@
+
+#ifndef SOCKETSERVER_HPP
+#define SOCKETSERVER_HPP
+
+#include <vector>
+#include "ASocketServerObserver.hpp"
+
 class SocketServer
 {
 private:
-	/* data */
+	int _fd;
+	bool _running;
+	std::vector<struct pollfd> _polls;
 public:
-	SocketServer(/* args */);
+	SocketServer(int portIn);
 	~SocketServer();
+	ASocketServerObserver *attachObserver(ASocketServerObserver *observerIn);
+	ASocketServerObserver *detachObserver(ASocketServerObserver *observerIn);
+	ASocketServerObserver *start();
+	ASocketServerObserver *stop();
 };
 
-SocketServer::SocketServer(/* args */)
-{
-}
-
-SocketServer::~SocketServer()
-{
-}
-
+#endif
