@@ -4,6 +4,7 @@
 #include "Channel.hpp"
 #include "User.hpp"
 #include "UserInfo.hpp"
+#include "Pending.hpp"
 #include <string>
 #include <stdexcept>
 #include <iostream>
@@ -62,15 +63,19 @@ Channel*	IRCServer::channel(const std::string& name) const
 
 void	IRCServer::onConnect(int fd)
 {
-	(void)fd;
-	std::cout << "Connect event" << std::endl;
+	ASocketClient*	socket(new Pending(fd));
+	_pendings[fd] = socket;
 }
 
 void	IRCServer::onData(int fd, const std::string& data)
 {
-	(void)fd;
-	(void)data;
-	std::cout << "Data event" << std::endl;
+	std::map<int, ASocketClient*>::iterator	pendingPtr(_pendings.find(fd));
+
+	if (pendingPtr != _pendings.end())
+	{
+		Pending*	pending(dynamic_cast<Pending*>(pendingPtr->second));
+		pending->input(data);
+	}
 }
 
 void	IRCServer::onDisconnect(int fd)

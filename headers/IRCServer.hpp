@@ -15,7 +15,7 @@ class IRCServer: public ASocketServerObserver
 {
     private:
         std::string	_password;
-		std::map<int, Pending*>	_pendings;
+		std::map<int, ASocketClient*>	_pendings;
 		std::map<std::string, User*>	_users;
 		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;
