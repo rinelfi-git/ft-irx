@@ -1,5 +1,7 @@
 #include "ASocketClient.hpp"
+#include "utils.hpp"
 #include <string>
+#include <iostream>
 
 ASocketClient::ASocketClient(int fd):
 	_fd(fd),
@@ -18,4 +20,32 @@ void	ASocketClient::send(const std::string& data) const
 {}
 
 void	ASocketClient::input(const std::string& data)
-{}
+{
+	_buffer += data;
+	std::map<std::string, std::string>	cmds;
+
+	while (!_buffer.empty())
+	{
+		size_t	space(_buffer.find(' '));
+		size_t	cr(_buffer.find('\r'));
+		size_t	lf(_buffer.find('\n'));
+		if (lf == std::string::npos)
+			break;
+		if (space == std::string::npos)
+			_buffer = _buffer.substr(lf + 1);
+		else if (space < lf)
+		{
+			size_t offset = space + 1;
+			std::string	line(_buffer.substr(0, lf));
+			size_t		length(lf - offset);
+			if (cr != std::string::npos)
+				length--;
+			std::string index(strToLower(_buffer.substr(0, space)));
+			std::string value(_buffer.substr(offset, length));
+			_buffer = _buffer.substr(lf + 1);
+			cmds[index] = value;
+			std::cout << "<<== (" << index << ")[" << value << "]" << std::endl;
+		}
+	}
+	parse(cmds);
+}
