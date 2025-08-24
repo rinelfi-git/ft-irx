@@ -4,10 +4,12 @@ CPPARG = -Wall -Wextra -Werror -std=c++98
 SRC_DIR = sources
 OBJ_DIR = objects
 SRCs = \
+	abstract/ASocketClient.cpp \
 	abstract/ASocketServerObserver.cpp \
 	IRCServer.cpp \
+	Pending.cpp \
 	SocketServer.cpp \
-	test.cpp
+	main.cpp
 OBJ_PATH = $(addprefix $(OBJ_DIR)/,$(SRCs:.cpp=.o))
 SRC_PATH = $(addprefix $(SRC_DIR)/,$(SRCs))
 INCLUDE_PATH = -I./headers -I./headers/abstract

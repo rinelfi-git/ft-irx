@@ -17,7 +17,9 @@ ASocketClient::~ASocketClient()
 {}
 
 void	ASocketClient::send(const std::string& data) const
-{}
+{
+	(void)data;
+}
 
 void	ASocketClient::input(const std::string& data)
 {
