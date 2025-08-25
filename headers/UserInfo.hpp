@@ -15,12 +15,12 @@ class UserInfo
 	public:
 		UserInfo();
 		~UserInfo();
-		UserInfo& operator=(const UserInfo& another);
-		void	nick(const std::string& set);
-		void	uname(const std::string& set);
-		void	realname(const std::string& set);
-		void	host(const std::string& set);
-		void	server(const std::string& set);
+		UserInfo&	operator=(const UserInfo& another);
+		UserInfo&	nick(const std::string& set);
+		UserInfo&	uname(const std::string& set);
+		UserInfo&	realname(const std::string& set);
+		UserInfo&	host(const std::string& set);
+		UserInfo&	server(const std::string& set);
 		const std::string&	nick(void) const;
 		const std::string&	uname(void) const;
 		const std::string&	realname(void) const;

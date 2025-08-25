@@ -1,6 +1,7 @@
 #include "Pending.hpp"
 #include "ASocketClient.hpp"
 #include "UserInfo.hpp"
+#include "IRCServer.hpp"
 #include <string>
 #include <map>
 #include <sstream>
@@ -15,7 +16,9 @@ Pending::~Pending()
 {}
 
 bool	Pending::auth(void)
-{return (false);}
+{
+	IRCServer::getInstance().auth(_userInfo, _password);
+}
 
 
 // en plus du parsing, a la fin on execute l'authentification
@@ -40,13 +43,31 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 }
 
 void	Pending::_parseNick(const std::string& in)
-{(void)in;}
+{
+	_userInfo.nick(in);
+}
 
 void	Pending::_parsePass(const std::string& in)
 {(void)in;}
 
 void	Pending::_parseUser(const std::string& in)
-{(void)in;}
+{
+	std::stringstream	builder(in);
+	std::string			uname;
+	std::string			host;
+	std::string			server;
+	std::string			realname;
+
+	builder >> uname;
+	builder >> host;
+	builder >> server;
+	builder >> realname;
+
+	_userInfo.uname(uname)
+		.host(host)
+		.server(server)
+		.realname(realname);
+}
 
 void	Pending::_parseCap(const std::string& in)
 {

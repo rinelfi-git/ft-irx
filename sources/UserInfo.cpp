@@ -17,25 +17,30 @@ UserInfo& UserInfo::operator=(const UserInfo& another)
 }
 
 
-void	UserInfo::nick(const std::string& set)
+UserInfo&	UserInfo::nick(const std::string& set)
 {
 	_nick = set;
+	return (*this);
 }
-void	UserInfo::uname(const std::string& set)
+UserInfo&	UserInfo::uname(const std::string& set)
 {
 	_uname = set;
+	return (*this);
 }
-void	UserInfo::realname(const std::string& set)
+UserInfo&	UserInfo::realname(const std::string& set)
 {
 	_realname = set;
+	return (*this);
 }
-void	UserInfo::host(const std::string& set)
+UserInfo&	UserInfo::host(const std::string& set)
 {
 	_host = set;
+	return (*this);
 }
-void	UserInfo::server(const std::string& set)
+UserInfo&	UserInfo::server(const std::string& set)
 {
 	_server = set;
+	return (*this);
 }
 const std::string&	UserInfo::nick() const
 {
