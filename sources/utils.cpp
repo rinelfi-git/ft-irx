@@ -13,3 +13,20 @@ std::string	strToLower(const std::string& str)
 	}
 	return (out);
 }
+
+bool	isnumber(const std::string& str)
+{
+	std::string::const_iterator	strPtr(str.begin());
+
+	if (str.empty())
+		return (false);
+	if (*strPtr == '+' || *strPtr == '-')
+		strPtr++;
+	while (strPtr != str.end())
+	{
+		if (!std::isdigit(*strPtr))
+			return (false);
+		strPtr++;
+	}
+	return (true);
+}
