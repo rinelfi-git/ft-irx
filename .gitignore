@@ -2,4 +2,3 @@
 .vscode/*
 /ircserv
 */**/*.o
-main.cpp
