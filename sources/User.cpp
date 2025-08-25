@@ -1,12 +1,11 @@
 #include "User.hpp"
 #include "Message.hpp"
 #include "Authenticated.hpp"
-#include "Pending.hpp"
 #include "UserInfo.hpp"
 
-User::User(const UserInfo& info, const Pending& pending):
+User::User(const UserInfo& info, Authenticated* socket):
 	_info(info),
-	_socket(pending)
+	_socket(socket)
 {}
 
 User::~User()
@@ -29,5 +28,5 @@ const UserInfo&	User::info(void) const
 
 const Authenticated&	User::socket(void) const
 {
-	return (_socket);
+	return (*_socket);
 }

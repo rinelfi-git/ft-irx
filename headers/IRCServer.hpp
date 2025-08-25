@@ -8,13 +8,15 @@
 class	User;
 class	UserInfo;
 class	Channel;
+class	Authenticated;
 class	Pending;
+class	ASocketClient;
 
 class IRCServer: public ASocketServerObserver
 {
     private:
         std::string	_password;
-		std::map<int, Pending*>	_pendings;
+		std::map<int, ASocketClient*>	_socketClients;
 		std::map<std::string, User*>	_users;
 		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;

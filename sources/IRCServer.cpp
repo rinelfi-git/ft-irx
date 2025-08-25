@@ -15,7 +15,7 @@ IRCServer* IRCServer::_instance = NULL;
 IRCServer::IRCServer(const std::string& password):
 	ASocketServerObserver(),
 	_password(password),
-	_pendings(),
+	_socketClients(),
 	_users(),
 	_channels()
 {
@@ -26,12 +26,12 @@ IRCServer::IRCServer(const std::string& password):
 
 IRCServer::~IRCServer()
 {
-	std::map<int, Pending*>::iterator	pendingPtr(_pendings.begin());
+	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.begin());
 	std::map<std::string, User*>::iterator	userPtr(_users.begin());
-	while (pendingPtr != _pendings.end())
+	while (socketClientPtr != _socketClients.end())
 	{
-		delete pendingPtr->second;
-		++pendingPtr;
+		delete socketClientPtr->second;
+		++socketClientPtr;
 	}
 	while (userPtr != _users.end())
 	{
@@ -83,19 +83,24 @@ Channel*	IRCServer::channel(const std::string& name) const
 
 void	IRCServer::onConnect(int fd)
 {
-	Pending*	socket(new Pending(fd));
-	_pendings[fd] = socket;
+	ASocketClient*	socket(new Pending(fd));
+	_socketClients[fd] = socket;
 }
 
 void	IRCServer::onData(int fd, const std::string& data)
 {
-	std::map<int, Pending*>::iterator	pendingPtr(_pendings.find(fd));
+	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.find(fd));
 
-	if (pendingPtr != _pendings.end())
+	if (dynamic_cast<Pending*>(socketClientPtr->second))
 	{
-		Pending*	pending(dynamic_cast<Pending*>(pendingPtr->second));
+		Pending*	pending(dynamic_cast<Pending*>(socketClientPtr->second));
 		pending->input(data);
 		pending->auth();
+	}
+	else if (dynamic_cast<Authenticated*>(socketClientPtr->second))
+	{
+		Authenticated*	authenticated(dynamic_cast<Authenticated*>(socketClientPtr->second));
+		authenticated->input(data);
 	}
 }
 
@@ -107,9 +112,11 @@ void	IRCServer::onDisconnect(int fd)
 
 User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
 {
-	User*	user(new User(info, pending));
+	ASocketClient*	socket(new Authenticated(pending));
+	User*			user(new User(info, dynamic_cast<Authenticated*>(socket)));
+	const int		fd(pending.fd());
 	_users[info.nick()] = user;
-	delete _pendings.at(pending.fd());
-	_pendings.erase(pending.fd());
+	delete _socketClients.at(fd);
+	_socketClients[fd] = socket;
 	return *user;
 }

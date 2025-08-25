@@ -13,39 +13,38 @@ Authenticated::Authenticated(const Pending& pending):
 Authenticated::~Authenticated()
 {}
 
-void	Authenticated::parseMode(const std::string& arg)
+void	Authenticated::_parseMode(const std::string& arg)
 {
 	(void)arg;
 }
 
-void	Authenticated::parsePrivMsg(const std::string& arg)
+void	Authenticated::_parsePrivMsg(const std::string& arg)
 {
 	(void)arg;
 }
 
-void	Authenticated::parsePing(const std::string& arg)
+void	Authenticated::_parsePing(const std::string& arg)
 {
 	send("pong " + arg);
 }
 
-void	Authenticated::parseJoin(const std::string& arg)
-{
-	(void)arg;
-
-}
-
-void	Authenticated::parseInvite(const std::string& arg)
+void	Authenticated::_parseJoin(const std::string& arg)
 {
 	(void)arg;
 }
 
-void	Authenticated::iMode(bool enable, const std::string& name)
+void	Authenticated::_parseInvite(const std::string& arg)
+{
+	(void)arg;
+}
+
+void	Authenticated::_iMode(bool enable, const std::string& name)
 {
 	(void)enable;
 	(void)name;
 }
 
-void	Authenticated::tMode(bool enable, const std::string& name)
+void	Authenticated::_tMode(bool enable, const std::string& name)
 {
 	(void)enable;
 	(void)name;
@@ -53,7 +52,7 @@ void	Authenticated::tMode(bool enable, const std::string& name)
 
 }
 
-void	Authenticated::kMode(bool enable, const std::string& name, const std::string& password)
+void	Authenticated::_kMode(bool enable, const std::string& name, const std::string& password)
 {
 	(void)enable;
 	(void)name;
@@ -61,7 +60,7 @@ void	Authenticated::kMode(bool enable, const std::string& name, const std::strin
 
 }
 
-void	Authenticated::oMode(bool enable, const std::string& name, const std::string& user)
+void	Authenticated::_oMode(bool enable, const std::string& name, const std::string& user)
 {
 	(void)enable;
 	(void)name;
@@ -69,7 +68,7 @@ void	Authenticated::oMode(bool enable, const std::string& name, const std::strin
 
 }
 
-void	Authenticated::lMode(bool enable, const std::string& name, const std::string& limit)
+void	Authenticated::_lMode(bool enable, const std::string& name, const std::string& limit)
 {
 	(void)enable;
 	(void)name;
@@ -81,11 +80,11 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 {
 	std::map<std::string, void (Authenticated::*)(const std::string&)>	actions;
 
-	actions["mode"] = &Authenticated::parseMode;
-	actions["privmsg"] = &Authenticated::parsePrivMsg;
-	actions["ping"] = &Authenticated::parsePing;
-	actions["join"] = &Authenticated::parseJoin;
-	actions["invite"] = &Authenticated::parseInvite;
+	actions["mode"] = &Authenticated::_parseMode;
+	actions["privmsg"] = &Authenticated::_parsePrivMsg;
+	actions["ping"] = &Authenticated::_parsePing;
+	actions["join"] = &Authenticated::_parseJoin;
+	actions["invite"] = &Authenticated::_parseInvite;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())
