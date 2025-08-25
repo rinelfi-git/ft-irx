@@ -1,4 +1,4 @@
-#include "../headers/UserInfo.hpp"
+#include "UserInfo.hpp"
 
 UserInfo::UserInfo()
 {}
@@ -8,56 +8,56 @@ UserInfo::~UserInfo()
 
 UserInfo& UserInfo::operator=(const UserInfo& another)
 {
-	this->setNick(getNick());
-	this->setUname(getUname());
-	this->setRealName(getRealName());
-	this->setHost(getHost());
-	this->setServer(getServer());
+	nick(another.nick());
+	uname(another.uname());
+	realname(another.realname());
+	host(another.host());
+	server(another.server());
 	return (*this);
 }
 
 
-void	UserInfo::setNick(std::string nick)
+void	UserInfo::nick(const std::string& set)
 {
-	this->_nick = nick;
+	_nick = set;
 }
-void	UserInfo::setUname(std::string uname)
+void	UserInfo::uname(const std::string& set)
 {
-	this->_uname = uname;
+	_uname = set;
 }
-void	UserInfo::setRealName(std::string realName)
+void	UserInfo::realname(const std::string& set)
 {
-	this->_realName = realName;
+	_realname = set;
 }
-void	UserInfo::setHost(std::string host)
+void	UserInfo::host(const std::string& set)
 {
-	this->_host = host;
+	_host = set;
 }
-void	UserInfo::setServer(std::string server)
+void	UserInfo::server(const std::string& set)
 {
-	this->_server = server;
+	_server = set;
 }
-const std::string&	UserInfo::getNick() const
+const std::string&	UserInfo::nick() const
 {
 	return (_nick);
 }
 
-const std::string&	UserInfo::getUname() const
+const std::string&	UserInfo::uname() const
 {
 	return (_uname);
 }
 
-const std::string&	UserInfo::getRealName() const
+const std::string&	UserInfo::realname() const
 {
-	return (_realName);
+	return (_realname);
 }
 
-const std::string&	UserInfo::getHost() const
+const std::string&	UserInfo::host() const
 {
 	return (_host);
 }
 
-const std::string&	UserInfo::getServer() const
+const std::string&	UserInfo::server() const
 {
 	return (_server);
 }

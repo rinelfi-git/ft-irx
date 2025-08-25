@@ -14,7 +14,7 @@ Pending::~Pending()
 {}
 
 bool	Pending::auth(void)
-{}
+{return (false);}
 
 
 // en plus du parsing, a la fin on execute l'authentification
@@ -39,13 +39,13 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 }
 
 void	Pending::_parseNick(const std::string& in)
-{}
+{(void)in;}
 
 void	Pending::_parsePass(const std::string& in)
-{}
+{(void)in;}
 
 void	Pending::_parseUser(const std::string& in)
-{}
+{(void)in;}
 
 void	Pending::_parseCap(const std::string& in)
-{}
+{(void)in;}

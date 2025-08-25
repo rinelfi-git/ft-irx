@@ -6,9 +6,12 @@ OBJ_DIR = objects
 SRCs = \
 	abstract/ASocketClient.cpp \
 	abstract/ASocketServerObserver.cpp \
+	ArgValidator.cpp \
 	IRCServer.cpp \
 	Pending.cpp \
 	SocketServer.cpp \
+	UserInfo.cpp \
+	utils.cpp \
 	main.cpp
 OBJ_PATH = $(addprefix $(OBJ_DIR)/,$(SRCs:.cpp=.o))
 SRC_PATH = $(addprefix $(SRC_DIR)/,$(SRCs))
