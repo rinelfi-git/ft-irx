@@ -58,5 +58,5 @@ void	Pending::_parseCap(const std::string& in)
 	builder >> arg;
 
 	if (cmd == "LS")
-		send(":" SERVER_NAME " CAP * LS :");
+		send("CAP * LS :");
 }

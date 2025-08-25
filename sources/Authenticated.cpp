@@ -1,6 +1,8 @@
-#include "../headers/Authenticated.hpp"
+#include "Authenticated.hpp"
+#include "ASocketClient.hpp"
 
-Authenticated::Authenticated(/* args */)
+Authenticated::Authenticated(int fd):
+	ASocketClient(fd)
 {}
 
 Authenticated::~Authenticated()
@@ -18,7 +20,7 @@ void	Authenticated::parsePrivMsg(const std::string& arg)
 
 void	Authenticated::parsePing(const std::string& arg)
 {
-	(void)arg;
+	send("pong " + arg);
 }
 
 void	Authenticated::parseJoin(const std::string& arg)
