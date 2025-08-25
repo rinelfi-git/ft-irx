@@ -19,7 +19,7 @@ class IRCServer: public ASocketServerObserver
 		std::map<std::string, User*>	_users;
 		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;
-        void	_createUser(UserInfo info, ASocketClient socket);
+        void	_createUser(UserInfo info, ASocketClient* socket);
         void	_createChannel(User first, std::string name);
     public:
         static IRCServer& getInstance(void);
