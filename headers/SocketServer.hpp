@@ -2,9 +2,9 @@
 #ifndef SOCKETSERVER_HPP
 # define SOCKETSERVER_HPP
 # define SOCKET_READ_BUFFER 512
+# include "ASocketServerObserver.hpp"
 # include <vector>
 # include <poll.h>
-# include "ASocketServerObserver.hpp"
 
 class SocketServer
 {
