@@ -15,6 +15,7 @@ Channel::Channel(const std::string& name, User* first):
 	_inviteds()
 {
 	_members[first->info().nick()] = first;
+	_operators[first->info().nick()] = first;
 }
 
 Channel::~Channel()
