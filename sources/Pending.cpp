@@ -52,7 +52,9 @@ void	Pending::_parseNick(const std::string& in)
 }
 
 void	Pending::_parsePass(const std::string& in)
-{(void)in;}
+{
+	_password = in;
+}
 
 void	Pending::_parseUser(const std::string& in)
 {
