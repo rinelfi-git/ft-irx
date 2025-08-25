@@ -8,16 +8,16 @@ class Authenticated
 	public:
 		Authenticated(/* args */);
 		~Authenticated();
-		Authenticated	*parseMode(std::string arg);
-		Authenticated	*parsePrivMsg(std::string arg);
-		Authenticated	*parsePing(std::string arg);
-		Authenticated	*parseJoin(std::string arg);
-		Authenticated	*parseInvite(std::string arg);
-		Authenticated	*iMode(bool enable, std::string name);
-		Authenticated	*tMode(bool enable, std::string name);
-		Authenticated	*kMode(bool enable, std::string name, std::string password);
-		Authenticated	*oMode(bool enable, std::string name, std::string user);
-		Authenticated	*IMode(bool enable, std::string name, std::string limit);
+		void	parseMode(const std::string& arg);
+		void	parsePrivMsg(const std::string& arg);
+		void	parsePing(const std::string& arg);
+		void	parseJoin(const std::string& arg);
+		void	parseInvite(const std::string& arg);
+		void	iMode(bool enable, const std::string& name);
+		void	tMode(bool enable, const std::string& name);
+		void	kMode(bool enable, const std::string& name, const std::string& password);
+		void	oMode(bool enable, const std::string& name, const std::string& user);
+		void	lMode(bool enable, const std::string& name, const std::string& limit);
 };
 
 #endif

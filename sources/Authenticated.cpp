@@ -6,73 +6,63 @@ Authenticated::Authenticated(/* args */)
 Authenticated::~Authenticated()
 {}
 
-Authenticated	*Authenticated::parseMode(std::string arg)
+void	Authenticated::parseMode(const std::string& arg)
 {
 	(void)arg;
-	return(this);
 }
 
-Authenticated	*Authenticated::parsePrivMsg(std::string arg)
+void	Authenticated::parsePrivMsg(const std::string& arg)
 {
 	(void)arg;
-	return(this);
 }
 
-Authenticated	*Authenticated::parsePing(std::string arg)
+void	Authenticated::parsePing(const std::string& arg)
 {
 	(void)arg;
-	return(this);
 }
 
-Authenticated	*Authenticated::parseJoin(std::string arg)
+void	Authenticated::parseJoin(const std::string& arg)
 {
 	(void)arg;
-	return(this);
 
 }
 
-Authenticated	*Authenticated::parseInvite(std::string arg)
+void	Authenticated::parseInvite(const std::string& arg)
 {
 	(void)arg;
-	return(this);
-
 }
 
-Authenticated	*Authenticated::iMode(bool enable, std::string name)
+void	Authenticated::iMode(bool enable, const std::string& name)
 {
 	(void)enable;
 	(void)name;
-	return(this);
 }
 
-Authenticated	*Authenticated::tMode(bool enable, std::string name)
+void	Authenticated::tMode(bool enable, const std::string& name)
 {
 	(void)enable;
 	(void)name;
-	return(this);
 
 
 }
 
-Authenticated	*Authenticated::kMode(bool enable, std::string name, std::string password)
+void	Authenticated::kMode(bool enable, const std::string& name, const std::string& password)
 {
 	(void)enable;
 	(void)name;
 	(void)password;
-	return(this);
 
 }
 
-Authenticated	*Authenticated::oMode(bool enable, std::string name, std::string user)
+void	Authenticated::oMode(bool enable, const std::string& name, const std::string& user)
 {
 	(void)enable;
 	(void)name;
 	(void)user;
-	return(this);
 
 }
 
-Authenticated	*Authenticated::IMode(bool enable, std::string name, std::string limit)
+void	Authenticated::lMode(bool enable, const std::string& name, const std::string& limit)
 {
 	(void)enable;
 	(void)name;
