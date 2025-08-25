@@ -3,6 +3,7 @@
 #include "UserInfo.hpp"
 #include <string>
 #include <map>
+#include <sstream>
 
 Pending::Pending(int fd):
 	ASocketClient(fd),
@@ -48,4 +49,14 @@ void	Pending::_parseUser(const std::string& in)
 {(void)in;}
 
 void	Pending::_parseCap(const std::string& in)
-{(void)in;}
+{
+	std::stringstream	builder(in);
+	std::string			cmd;
+	std::string			arg;
+
+	builder >> cmd;
+	builder >> arg;
+
+	if (cmd == "LS")
+		send(":" SERVER_NAME " CAP * LS :");
+}

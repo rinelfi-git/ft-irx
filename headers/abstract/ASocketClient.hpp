@@ -1,5 +1,6 @@
 #ifndef A_SOCKET_CLIENT_HPP
 # define A_SOCKET_CLIENT_HPP
+# define SERVER_NAME "ft-irc.local"
 # include <string>
 # include <map>
 

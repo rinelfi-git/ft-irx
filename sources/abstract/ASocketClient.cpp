@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include <string>
 #include <iostream>
+#include <sys/socket.h>
 
 ASocketClient::ASocketClient(int fd):
 	_fd(fd),
@@ -18,7 +19,12 @@ ASocketClient::~ASocketClient()
 
 void	ASocketClient::send(const std::string& data) const
 {
-	(void)data;
+	if (_fd != -1)
+	{
+		std::cout << "==>> " << data << std::endl;
+		std::string msg = data + "\r\n";
+		::send(_fd, msg.c_str(), msg.length(), 0);
+	}
 }
 
 void	ASocketClient::input(const std::string& data)
