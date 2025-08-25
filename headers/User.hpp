@@ -6,15 +6,16 @@ class	ASocketClient;
 
 class User
 {
-	private:
-		UserInfo _userInfo;
-	public:
-		User(const UserInfo& userInfo);
-		~User();
-		std::string	networkld(void);
-		User	*message(Message message);
-		User	*connect(ASocketClient* socket);
-		User	*disconnect(void);
+private:
+	UserInfo _info;
+public:
+	User(const UserInfo& info);
+	~User();
+	std::string	networkld(void) const;
+	void	message(const Message& message);
+	void	connect(ASocketClient* socket);
+	void	disconnect(void);
+	const UserInfo& info(void) const;
 };
 
 #endif

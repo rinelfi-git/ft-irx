@@ -1,30 +1,31 @@
 #include "User.hpp"
 #include "Message.hpp"
 
-User		*User::message(Message message)
+User::User(const UserInfo& info): _info(info)
+{}
+
+void	User::message(const Message& message)
 {
-	return (this);
+	(void) message;
 }
 
-std::string	User::networkld(void)
+std::string	User::networkld(void) const
 {
 	return ("std::string	User::networkld(void)");
 }
 
-User		*User::connect(ASocketClient *socket)
+void	User::connect(ASocketClient *socket)
 {
-	return (this);
+	(void)socket;
 }
 
-User		*User::disconnect(void)
-{
-	return (this);
-}
-
-User::User(const UserInfo& userInfo)
-{
-	this->_userInfo = userInfo;
-}
+void	User::disconnect(void)
+{}
 
 User::~User()
 {}
+
+const UserInfo&	User::info(void) const
+{
+	return (_info);
+}

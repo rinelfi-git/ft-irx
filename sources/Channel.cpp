@@ -5,7 +5,7 @@
 #include "User.hpp"
 #include "Message.hpp"
 
-Channel::Channel(const std::string& name, User* fist):
+Channel::Channel(const std::string& name, User* first):
 	_name(name),
 	_password(),
 	_topic(),
@@ -14,16 +14,16 @@ Channel::Channel(const std::string& name, User* fist):
 	_operators(),
 	_inviteds()
 {
-	_members[first->nick()] = first;
+	_members[first->info().nick()] = first;
 }
 
 Channel::~Channel()
 {}
 
-void	Channel::message(const Message& msg)
+void	Channel::message(const Message& msg) const
 {}
 
-void	Channel::invite(const User& host, const User guest)
+void	Channel::invite(const User& host, const User& guest)
 {}
 
 void	Channel::setTopic(const std::string& set)
