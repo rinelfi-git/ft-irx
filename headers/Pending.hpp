@@ -19,5 +19,7 @@ public:
 	~Pending();
 	bool	auth(void);
 	virtual void	parse(const std::map<std::string, std::string>& cmds);
+	const std::string&	password(void) const;
+	const UserInfo&	userInfo(void) const;
 };
 #endif

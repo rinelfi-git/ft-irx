@@ -16,5 +16,6 @@ public:
 	void	send(const std::string& data) const;
 	void	input(const std::string& data);
 	virtual void	parse(const std::map<std::string, std::string>& cmds) = 0;
+	int		fd(void) const;
 };
 #endif

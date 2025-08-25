@@ -17,7 +17,11 @@ Pending::~Pending()
 
 bool	Pending::auth(void)
 {
-	IRCServer::getInstance().auth(_userInfo, _password);
+	std::cout << "Authentication" << std::endl;
+	if (!_userInfo.complete())
+		return (false);
+	std::cout << "User information is complete" << std::endl;
+	return IRCServer::getInstance().auth(*this);
 }
 
 
@@ -57,11 +61,13 @@ void	Pending::_parseUser(const std::string& in)
 	std::string			host;
 	std::string			server;
 	std::string			realname;
+	char				ddot;
 
 	builder >> uname;
 	builder >> host;
 	builder >> server;
-	builder >> realname;
+	builder >> ddot;
+	std::getline(builder, realname);
 
 	_userInfo.uname(uname)
 		.host(host)
@@ -80,4 +86,14 @@ void	Pending::_parseCap(const std::string& in)
 
 	if (cmd == "LS")
 		send("CAP * LS :");
+}
+
+const std::string&	Pending::password() const
+{
+	return (_password);
+}
+
+const UserInfo&	Pending::userInfo() const
+{
+	return (_userInfo);
 }

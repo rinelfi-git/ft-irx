@@ -1,21 +1,23 @@
 #ifndef USER_HPP
 # define USER_HPP
 # include "UserInfo.hpp"
+# include "Authenticated.hpp"
 
-class	ASocketClient;
+class	Pending;
+class	Message;
 
 class User
 {
 private:
-	UserInfo _info;
+	UserInfo 		_info;
+	Authenticated	_socket;
 public:
-	User(const UserInfo& info);
+	User(const UserInfo& info, const Pending& pending);
 	~User();
 	std::string	networkld(void) const;
 	void	message(const Message& message);
-	void	connect(ASocketClient* socket);
-	void	disconnect(void);
 	const UserInfo& info(void) const;
+	const Authenticated& socket(void) const;
 };
 
 #endif

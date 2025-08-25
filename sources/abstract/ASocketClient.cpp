@@ -57,3 +57,8 @@ void	ASocketClient::input(const std::string& data)
 	}
 	parse(cmds);
 }
+
+int	ASocketClient::fd(void) const
+{
+	return (_fd);
+}

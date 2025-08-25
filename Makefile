@@ -7,9 +7,11 @@ SRCs = \
 	abstract/ASocketClient.cpp \
 	abstract/ASocketServerObserver.cpp \
 	ArgValidator.cpp \
+	Authenticated.cpp \
 	IRCServer.cpp \
 	Pending.cpp \
 	SocketServer.cpp \
+	User.cpp \
 	UserInfo.cpp \
 	utils.cpp \
 	main.cpp

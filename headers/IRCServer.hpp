@@ -7,7 +7,6 @@
 
 class	User;
 class	UserInfo;
-class	ASocketClient;
 class	Channel;
 class	Pending;
 
@@ -15,18 +14,18 @@ class IRCServer: public ASocketServerObserver
 {
     private:
         std::string	_password;
-		std::map<int, ASocketClient*>	_pendings;
+		std::map<int, Pending*>	_pendings;
 		std::map<std::string, User*>	_users;
 		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;
-        void	_createUser(UserInfo info, ASocketClient* socket);
+        User&	_createUser(const UserInfo& info, const Pending& pending);
         void	_createChannel(User first, std::string name);
     public:
         static IRCServer& getInstance(void);
         IRCServer(const std::string& password);
         ~IRCServer();
         void			joinChannel(const User& user, const std::string& name);
-        void			auth(const UserInfo& user, const std::string& password);
+        bool			auth(const Pending& pending);
         User*			user(const std::string& nick) const;
         Channel*		channel(const std::string& name) const;
 		virtual void	onConnect(int fd);

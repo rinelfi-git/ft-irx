@@ -1,6 +1,19 @@
 #include "UserInfo.hpp"
 
-UserInfo::UserInfo()
+UserInfo::UserInfo(void):
+	_nick(),
+	_uname(),
+	_realname(),
+	_host(),
+	_server()
+{}
+
+UserInfo::UserInfo(const UserInfo& other):
+	_nick(other._nick),
+	_uname(other._uname),
+	_realname(other._realname),
+	_host(other._host),
+	_server(other._server)
 {}
 
 UserInfo::~UserInfo()
@@ -65,4 +78,9 @@ const std::string&	UserInfo::host() const
 const std::string&	UserInfo::server() const
 {
 	return (_server);
+}
+
+bool	UserInfo::complete() const
+{
+	return (!_nick.empty() && !_uname.empty() && !_realname.empty() && !_host.empty() && !_server.empty());
 }

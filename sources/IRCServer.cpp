@@ -5,6 +5,7 @@
 #include "User.hpp"
 #include "UserInfo.hpp"
 #include "Pending.hpp"
+#include "Authenticated.hpp"
 #include <string>
 #include <stdexcept>
 #include <iostream>
@@ -24,7 +25,20 @@ IRCServer::IRCServer(const std::string& password):
 }
 
 IRCServer::~IRCServer()
-{}
+{
+	std::map<int, Pending*>::iterator	pendingPtr(_pendings.begin());
+	std::map<std::string, User*>::iterator	userPtr(_users.begin());
+	while (pendingPtr != _pendings.end())
+	{
+		delete pendingPtr->second;
+		++pendingPtr;
+	}
+	while (userPtr != _users.end())
+	{
+		delete userPtr->second;
+		++userPtr;
+	}
+}
 
 IRCServer&	IRCServer::getInstance(void)
 {
@@ -39,10 +53,16 @@ void	IRCServer::joinChannel(const User& user, const std::string& name)
 	(void)name;
 }
 
-void	IRCServer::auth(const UserInfo& user, const std::string& password)
+bool	IRCServer::auth(const Pending& pending)
 {
-	(void)user;
-	(void)password;
+	if (_password.empty() || pending.password() == _password)
+	{
+		User	created(_createUser(pending.userInfo(), pending));
+		created.socket().send("001 " + created.info().nick() + " :Welcome to the Internet Relay Network " + created.networkld());
+		return true;
+	}
+	pending.send("464 * :Password incorrect");
+	return false;
 }
 
 User*	IRCServer::user(const std::string& nick) const
@@ -63,18 +83,19 @@ Channel*	IRCServer::channel(const std::string& name) const
 
 void	IRCServer::onConnect(int fd)
 {
-	ASocketClient*	socket(new Pending(fd));
+	Pending*	socket(new Pending(fd));
 	_pendings[fd] = socket;
 }
 
 void	IRCServer::onData(int fd, const std::string& data)
 {
-	std::map<int, ASocketClient*>::iterator	pendingPtr(_pendings.find(fd));
+	std::map<int, Pending*>::iterator	pendingPtr(_pendings.find(fd));
 
 	if (pendingPtr != _pendings.end())
 	{
 		Pending*	pending(dynamic_cast<Pending*>(pendingPtr->second));
 		pending->input(data);
+		pending->auth();
 	}
 }
 
@@ -82,4 +103,13 @@ void	IRCServer::onDisconnect(int fd)
 {
 	(void)fd;
 	std::cout << "Disconnect event" << std::endl;
+}
+
+User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
+{
+	User*	user(new User(info, pending));
+	_users[info.nick()] = user;
+	delete _pendings.at(pending.fd());
+	_pendings.erase(pending.fd());
+	return *user;
 }
