@@ -21,7 +21,7 @@ void	ASocketClient::send(const std::string& data) const
 {
 	if (_fd != -1)
 	{
-		std::cout << "==>> " << data << std::endl;
+		std::cout << OUT_COLOR << data << std::endl << DEFAULT_COLOR;
 		std::string msg = data + "\r\n";
 		::send(_fd, msg.c_str(), msg.length(), 0);
 	}
@@ -52,7 +52,7 @@ void	ASocketClient::input(const std::string& data)
 			std::string value(_buffer.substr(offset, length));
 			_buffer = _buffer.substr(lf + 1);
 			cmds[index] = value;
-			std::cout << "<<== (" << index << ")[" << value << "]" << std::endl;
+			std::cout << IN_COLOR << "(" << index << ")[" << value << "]" << std::endl << DEFAULT_COLOR;
 		}
 	}
 	parse(cmds);
