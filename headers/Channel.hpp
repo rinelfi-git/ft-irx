@@ -38,5 +38,6 @@ public:
 	bool				auth(User* user, const std::string& password);
 	void				setPassword(const User& setter, const std::string& password);
 	void				setTopicMode(const User& setter, bool operatorOnly);
+	void				quit(const User& user, const std::string& msg);
 };
 #endif

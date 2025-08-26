@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <sys/socket.h>
+#include <unistd.h>
 
 ASocketClient::ASocketClient(int fd):
 	_fd(fd),
@@ -61,4 +62,10 @@ void	ASocketClient::input(const std::string& data)
 int	ASocketClient::fd(void) const
 {
 	return (_fd);
+}
+
+void	ASocketClient::close(void) const
+{
+	if (_fd != -1)
+		::close(_fd);
 }

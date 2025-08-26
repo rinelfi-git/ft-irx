@@ -17,6 +17,8 @@ private:
 	void	_parseJoin(const std::string& arg);
 	void	_parseInvite(const std::string& arg);
 	void	_parseTopic(const std::string& arg);
+	void	_parseQuit(const std::string& arg);
+	void	_parseKick(const std::string& arg);
 	void	_tMode(const std::string& name, char action);
 	void	_iMode(const std::string& name, char action, const std::string& user);
 	void	_kMode(const std::string& name, char action, const std::string& password);

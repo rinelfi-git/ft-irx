@@ -262,3 +262,18 @@ void	Channel::setTopicMode(const User& setter, bool operatorOnly)
 		member.socket().send(msg);
 	}
 }
+
+void	Channel::quit(const User& user, const std::string& msg)
+{
+	std::string	nick(user.info().nick());
+	_members.erase(nick);
+	_operators.erase(nick);
+	_inviteds.erase(nick);
+	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
+
+	while (memberPtr != _members.end())
+	{
+		User	member(*(memberPtr++)->second);
+		member.socket().send(":" + user.networkId() + " QUIT " + msg);
+	}
+}

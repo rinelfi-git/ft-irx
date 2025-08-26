@@ -111,13 +111,22 @@ void	IRCServer::onData(int fd, const std::string& data)
 
 void	IRCServer::onDisconnect(int fd)
 {
+	if (_socketClients.find(fd) == _socketClients.end())
+		return ;
 	ASocketClient*	socket(_socketClients.at(fd));
 	Authenticated*	auth(dynamic_cast<Authenticated*> (socket));
 	if (auth)
 	{
-		// disconnect user from all channels then
 		User*	user(auth->user());
-		std::string	nick(user->info().nick());
+		std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
+		const std::string	nick(user->info().nick());
+		while (channelPtr != _channels.end())
+		{
+			Channel*	channel(channelPtr->second);
+			if (channel->isMember(*user))
+				channel->quit(*user, ":My connection was interrupted");
+			channelPtr++;
+		}
 		delete user;
 		_users.erase(nick);
 	}
@@ -137,10 +146,23 @@ User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
 }
 
 void	IRCServer::createChannel(const std::string& name, User* first)
- {
+{
 	Channel *channel = new Channel(name, first);
 	_channels[name] = channel;
 	first->socket().send(":" + first->networkId() + " JOIN " + name);
 	first->socket().send("353 " + first->info().nick() + " = " + name + " :" + channel->getUsers());
 	first->socket().send("366 " + first->info().nick() + " " + name + " :End of /NAMES list.");
- }
+}
+
+void	IRCServer::quit(const User& user, const std::string& msg)
+{
+	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
+	const std::string	nick(user.info().nick());
+	while (channelPtr != _channels.end())
+	{
+		Channel*	channel((channelPtr++)->second);
+		if (channel->isMember(user))
+			channel->quit(user, msg);
+	}
+	user.socket().close();
+}

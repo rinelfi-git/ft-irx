@@ -33,5 +33,6 @@ class IRCServer: public ASocketServerObserver
 		virtual void	onData(int fd, const std::string& data);
 		virtual void	onDisconnect(int fd);
         void			createChannel(const std::string& name, User* first);
+		void			quit(const User& user, const std::string& msg);
 };
 #endif

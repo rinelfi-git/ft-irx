@@ -18,5 +18,6 @@ public:
 	void	send(const std::string& data) const;
 	void	input(const std::string& data);
 	int		fd(void) const;
+	void	close(void) const;
 };
 #endif

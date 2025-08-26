@@ -125,6 +125,16 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	channel->setTopic(*_user, topic);
 }
 
+void	Authenticated::_parseKick(const std::string& arg)
+{
+	std::cout << "Kick " << arg << std::endl;
+}
+
+void	Authenticated::_parseQuit(const std::string& arg)
+{
+	IRCServer::getInstance().quit(*_user, arg);
+}
+
 void	Authenticated::_iMode(const std::string& name, char action, const std::string& user)
 {
 	if (action == '+')
@@ -190,6 +200,8 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	actions["join"] = &Authenticated::_parseJoin;
 	actions["invite"] = &Authenticated::_parseInvite;
 	actions["topic"] = &Authenticated::_parseTopic;
+	actions["kick"] = &Authenticated::_parseKick;
+	actions["quit"] = &Authenticated::_parseQuit;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())
