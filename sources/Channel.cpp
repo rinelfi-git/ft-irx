@@ -107,6 +107,8 @@ void	Channel::join(User* user)
 	user->socket().send("366 " + nick + " " + _name + " :End of /NAMES list.");
 	if (!_topic.empty())
 		user->socket().send("332 " + nick + " " + _name + " :" + _topic);
+	else
+		user->socket().send("331 " + nick + " " + _name + " :No topic is set");
 }
 
 std::string Channel::getUsers() const
