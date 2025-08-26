@@ -17,15 +17,11 @@ Pending::~Pending()
 
 bool	Pending::auth(void)
 {
-	std::cout << "Authentication" << std::endl;
 	if (!_userInfo.complete())
 		return (false);
-	std::cout << "User information is complete" << std::endl;
 	return IRCServer::getInstance().auth(*this);
 }
 
-
-// en plus du parsing, a la fin on execute l'authentification
 void	Pending::parse(const std::map<std::string, std::string>& cmds)
 {
 	std::map<std::string, void (Pending::*)(const std::string&)>	actions;
@@ -42,8 +38,6 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 			(this->*actions.at(cmdPtr->first))(cmdPtr->second);
 		actionPtr++;
 	}
-
-	// code de l'authentification ici: a discuter
 }
 
 void	Pending::_parseNick(const std::string& in)

@@ -6,7 +6,9 @@
 User::User(const UserInfo& info, Authenticated* socket):
 	_info(info),
 	_socket(socket)
-{}
+{
+	socket->user(this);
+}
 
 User::~User()
 {}

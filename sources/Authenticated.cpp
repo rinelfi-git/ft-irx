@@ -1,13 +1,16 @@
 #include "Authenticated.hpp"
 #include "ASocketClient.hpp"
 #include "Pending.hpp"
+#include "User.hpp"
 
 Authenticated::Authenticated(int fd):
-	ASocketClient(fd)
+	ASocketClient(fd),
+	_user(NULL)
 {}
 
 Authenticated::Authenticated(const Pending& pending):
-	ASocketClient(pending)
+	ASocketClient(pending),
+	_user(NULL)
 {}
 
 Authenticated::~Authenticated()
@@ -94,8 +97,14 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 			(this->*actions.at(cmdPtr->first))(cmdPtr->second);
 		actionPtr++;
 	}
+}
 
-	// other commands to implement here
-	// kick, topic, part, notice, whois, away, quit, list, names, oper, userhost, motd, lusers, version, time, admin, info
-	// and all the channel modes +i +k +l +o +t
+const User&	Authenticated::user(void) const
+{
+	return (*_user);
+}
+
+void	Authenticated::user(User* set)
+{
+	_user = set;
 }

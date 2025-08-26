@@ -5,10 +5,12 @@
 # include <map>
 
 class	Pending;
+class	User;
 
 class Authenticated: public ASocketClient
 {
 private:
+	User*	_user;
 	void	_parseMode(const std::string& arg);
 	void	_parsePrivMsg(const std::string& arg);
 	void	_parsePing(const std::string& arg);
@@ -25,6 +27,8 @@ public:
 	Authenticated(int fd);
 	Authenticated(const Pending& pending);
 	~Authenticated();
+	const User&	user(void) const;
+	void		user(User* user);
 };
 
 #endif
