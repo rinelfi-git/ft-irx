@@ -53,14 +53,13 @@ bool	Channel::isMember(const std::string& user) const
 
 bool	Channel::isOperator(const User& user) const
 {
-	(void)user;
-	return (true);
+	
+	return (_operators.find(user.info().nick()) != _operators.end());
 }
 
 bool	Channel::isOperator(const std::string& user) const
 {
-	(void)user;
-	return (true);
+	return (_operators.find(user) != _operators.end());
 }
 
 bool	Channel::isInvited(const User& user) const
@@ -88,4 +87,26 @@ const Mode&	Channel::mode(void) const
 void	Channel::join(User* user)
 {
 	(void)user;
+}
+
+std::string Channel::getUsers() const
+{
+	std::map<std::string, User*>::const_iterator	itOperator(_operators.begin());
+	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
+
+	std::string out;
+
+	while (itOperator != _operators.end())
+	{
+		out += " @" + itOperator->second->info().nick();
+		itOperator++;
+	}
+
+	while (itMember != _members.end())
+	{
+		if (!isOperator(*itMember->second))
+		out += " " + itMember->second->info().nick();
+		itMember++;
+	}
+	return (out.substr(1));
 }

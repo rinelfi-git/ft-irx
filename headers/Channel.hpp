@@ -32,5 +32,7 @@ public:
 	void	join(User* user);
 	const std::string&	name(void) const;
 	const Mode&			mode(void) const;
+
+	std::string getUsers() const;
 };
 #endif

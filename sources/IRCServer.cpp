@@ -142,5 +142,8 @@ User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
 void	IRCServer::createChannel(const std::string& name, User* first)
  {
 	Channel *channel = new Channel(name, first);
-	_channels[name] = channel; 
+	_channels[name] = channel;
+	first->socket().send(":" + first->networkld() + " JOIN " + name);
+	first->socket().send("353 " + first->info().nick() + " = " + name + " :" + channel->getUsers());
+	first->socket().send("366 " + first->info().nick() + " " + name + " :End of /NAMES list.");
  }
