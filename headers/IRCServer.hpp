@@ -26,13 +26,12 @@ class IRCServer: public ASocketServerObserver
         static IRCServer& getInstance(void);
         IRCServer(const std::string& password);
         ~IRCServer();
-        void			joinChannel(const User& user, const std::string& name);
         bool			auth(const Pending& pending);
         User*			user(const std::string& nick) const;
         Channel*		channel(const std::string& name) const;
 		virtual void	onConnect(int fd);
 		virtual void	onData(int fd, const std::string& data);
 		virtual void	onDisconnect(int fd);
-        void	createChannel(const std::string& name, User* first);
+        void			createChannel(const std::string& name, User* first);
 };
 #endif

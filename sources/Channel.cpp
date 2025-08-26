@@ -162,7 +162,6 @@ std::string	Channel::modeResume(const std::string& modes) const
 }
 bool	Channel::auth(User* user, const std::string& password)
 {
-	std::cout << "User : " << user->info().nick() << " attempt to join channel " << _name << " with key '" << password << "' VS '" << _password << "'" << std::endl;
 	if (isInvited(*user))
 		return (true);
 	if (_mode.isInviteOnly() && !isInvited(*user))
