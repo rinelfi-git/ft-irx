@@ -27,8 +27,8 @@ public:
 	Authenticated(int fd);
 	Authenticated(const Pending& pending);
 	~Authenticated();
-	const User&	user(void) const;
-	void		user(User* user);
+	User*	user(void) const;
+	void	user(User* user);
 };
 
 #endif

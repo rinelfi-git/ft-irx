@@ -22,6 +22,7 @@ class IRCServer: public ASocketServerObserver
 		static IRCServer*	_instance;
         User&	_createUser(const UserInfo& info, const Pending& pending);
         void	_createChannel(User first, std::string name);
+		static void	_sigint(int num);
     public:
         static IRCServer& getInstance(void);
         IRCServer(const std::string& password);

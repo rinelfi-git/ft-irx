@@ -99,9 +99,9 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	}
 }
 
-const User&	Authenticated::user(void) const
+User*	Authenticated::user(void) const
 {
-	return (*_user);
+	return (_user);
 }
 
 void	Authenticated::user(User* set)

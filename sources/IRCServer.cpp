@@ -9,6 +9,7 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <csignal>
 
 IRCServer* IRCServer::_instance = NULL;
 
@@ -22,6 +23,7 @@ IRCServer::IRCServer(const std::string& password):
 	if (IRCServer::_instance)
 		throw std::logic_error("Violation of the singleton principle.");
 	IRCServer::_instance = this;
+	signal(SIGINT, IRCServer::_sigint);
 }
 
 IRCServer::~IRCServer()
@@ -38,6 +40,13 @@ IRCServer::~IRCServer()
 		delete userPtr->second;
 		++userPtr;
 	}
+}
+
+void	IRCServer::_sigint(int num)
+{
+	_instance->observable().stop();
+	std::cout << std::endl << "Stopping server..." << std::endl;
+	signal(num, SIG_DFL);
 }
 
 IRCServer&	IRCServer::getInstance(void)
@@ -106,8 +115,17 @@ void	IRCServer::onData(int fd, const std::string& data)
 
 void	IRCServer::onDisconnect(int fd)
 {
-	(void)fd;
-	std::cout << "Disconnect event" << std::endl;
+	ASocketClient*	socket(_socketClients.at(fd));
+	Authenticated*	auth(dynamic_cast<Authenticated*> (socket));
+	if (auth)
+	{
+		User*	user(auth->user());
+		std::string	nick(user->info().nick());
+		delete user;
+		_users.erase(nick);
+	}
+	delete	socket;
+	_socketClients.erase(fd);
 }
 
 User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)

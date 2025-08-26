@@ -94,14 +94,17 @@ void	SocketServer::stop(void)
 		return ;
 	_running = false;
 	std::vector<ASocketServerObserver*>::iterator	observersPtr(_observers.begin());
-	std::vector<struct pollfd>::iterator	pollsPtr(_polls.begin());
 	while (observersPtr != _observers.end())
 	{
 		ASocketServerObserver* observer(*observersPtr++);
-		observer->onDisconnect(_fd);
+
+		std::vector<struct pollfd>::iterator	pollsPtr(_polls.begin());
+		while (++pollsPtr != _polls.end())
+		{
+			observer->onDisconnect(pollsPtr->fd);
+			::close(pollsPtr->fd);
+		}
 	}
-	while (pollsPtr != _polls.end())
-		::close((pollsPtr++)->fd);
 }
 
 void	SocketServer::_acceptClient(void)
@@ -117,7 +120,6 @@ void	SocketServer::_acceptClient(void)
 	client.revents = 0;
 	for (size_t j(0); j < _observers.size(); j++)
 		_observers[j]->onConnect(fd);
-	std::cout << "NEW CONNECTION << " << fd << std::endl;
 	_polls.push_back(client);
 }
 
@@ -139,7 +141,6 @@ bool	SocketServer::_handleClient(int index)
 			_observers[j]->onDisconnect(fd);
 		::close(fd);
 		_polls.erase(_polls.begin() + index);
-		std::cout << "DISCONNECTION >> " << fd << std::endl;
 	}
 	else
 	{
@@ -149,7 +150,6 @@ bool	SocketServer::_handleClient(int index)
 			_observers[j]->onDisconnect(fd);
 		::close(fd);
 		_polls.erase(_polls.begin() + index);
-		std::cout << "DISCONNECTION >> " << fd << std::endl;
 	}
 	return (read);
 }
