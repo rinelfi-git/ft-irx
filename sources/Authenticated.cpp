@@ -91,15 +91,17 @@ void	Authenticated::_parsePing(const std::string& arg)
 
 void	Authenticated::_parseJoin(const std::string& arg)
 {
-	Channel *channel = IRCServer::getInstance().channel(arg);
+	std::stringstream	builder(arg);
+	std::string			name;
+	std::string			password;
+
+	builder >> name;
+	builder >> password;
+	Channel *channel = IRCServer::getInstance().channel(name);
 	if (!channel)
-	{
-		IRCServer::getInstance().createChannel(arg, _user);
-	}
-	else
-	{
+		IRCServer::getInstance().createChannel(name, _user);
+	else if (channel->auth(_user, password))
 		channel->join(_user);
-	}
 }
 
 void	Authenticated::_parseInvite(const std::string& arg)

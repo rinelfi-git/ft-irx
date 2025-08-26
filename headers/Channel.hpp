@@ -32,9 +32,9 @@ public:
 	void	join(User* user);
 	const std::string&	name(void) const;
 	const Mode&			mode(void) const;
-
-	std::string getUsers() const;
-	std::string	modeResume(void) const;
-	std::string	modeResume(const std::string& modes) const;
+	std::string			modeResume(void) const;
+	std::string			modeResume(const std::string& modes) const;
+	std::string			getUsers() const;
+	bool				auth(User* user, const std::string& password);
 };
 #endif
