@@ -94,6 +94,8 @@ const Mode&	Channel::mode(void) const
 
 void	Channel::join(User* user)
 {
+	if (isMember(*user))
+		return;
 	std::string	nick( user->info().nick());
 	_members[nick] = user;
 	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
@@ -127,4 +129,26 @@ std::string Channel::getUsers() const
 			out += " " + member.info().nick();
 	}
 	return (out.substr(1));
+}
+
+bool	Channel::auth(User* user, const std::string& password)
+{
+	if (isInvited(*user))
+		return (true);
+	if (_mode.isInviteOnly() && !isInvited(*user))
+	{
+		user->socket().send("473 " + user->info().nick() + " " + _name + " :Cannot join channel (+i)");
+		return (false);
+	}
+	if (!_password.empty() && _password != password)
+	{
+		user->socket().send("475 " + user->info().nick() + " " + _name + " :Cannot join channel (+k)");
+		return (false);
+	}
+	if (_mode.memberLimit() > 0 && _members.size() >= _mode.memberLimit())
+	{
+		user->socket().send("471 " + user->info().nick() + " " + _name + " :Cannot join channel (+l)");
+		return (false);
+	}
+	return (true);
 }
