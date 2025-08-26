@@ -132,23 +132,28 @@ std::string	Channel::modeResume(void) const
 {
 	std::string	modes;
 	std::string	args;
-	if (_mode.isInviteOnly())
-		modes += "i";
-	if (_mode.isTopicRestricted())
-		modes += "t";
-	if (_mode.memberLimit())
+	std::map<char, bool>		modeFlags;
+	std::map<char, std::string>	modeArgs;
+
+	std::stringstream	builder;
+	std::string			limit;
+	builder << _mode.memberLimit();
+	builder >> limit;
+
+	modeFlags['i'] = _mode.isInviteOnly();
+	modeFlags['t'] = _mode.isTopicRestricted();
+	modeFlags['l'] = _mode.memberLimit() > 0;
+	modeFlags['k'] = !_password.empty();
+	modeArgs['k'] = _password;
+	modeArgs['l'] = limit;
+	std::map<char, bool>::const_iterator	itModeFlag(modeFlags.begin());
+	while (itModeFlag != modeFlags.end())
 	{
-		modes += "l";
-		std::stringstream	builder;
-		std::string			limit;
-		builder << _mode.memberLimit();
-		builder >> limit;
-		args += " " + limit;
-	}
-	if (!_password.empty())
-	{
-		modes += "k";
-		args += " " + _password;
+		if (itModeFlag->second)
+			modes += itModeFlag->first;
+		if (modeArgs.find(itModeFlag->first) != modeArgs.end() && itModeFlag->second)
+			args += " " + modeArgs.at(itModeFlag->first);
+		++itModeFlag;
 	}
 	if (!modes.empty())
 		return ("+" + modes + args);
@@ -157,7 +162,33 @@ std::string	Channel::modeResume(void) const
 
 std::string	Channel::modeResume(const std::string& modes) const
 {
-	(void) modes;
+	std::string	modeOutputs;
+	std::string	args;
+	std::map<char, bool>		modeFlags;
+	std::map<char, std::string>	modeArgs;
+
+	std::stringstream	builder;
+	std::string			limit;
+	builder << _mode.memberLimit();
+	builder >> limit;
+
+	modeFlags['i'] = _mode.isInviteOnly();
+	modeFlags['t'] = _mode.isTopicRestricted();
+	modeFlags['l'] = _mode.memberLimit() > 0;
+	modeFlags['k'] = !_password.empty();
+	modeArgs['k'] = _password;
+	modeArgs['l'] = limit;
+	std::string::const_iterator				itMode(modes.begin());
+	while (itMode != modes.end())
+	{
+		if (modeFlags.find(*itMode) != modeFlags.end() && modeFlags.at(*itMode))
+			modeOutputs += *itMode;
+		if (modeArgs.find(*itMode) != modeArgs.end() && modeFlags.at(*itMode))
+			args += " " + modeArgs.at(*itMode);
+		++itMode;
+	}
+	if (!modeOutputs.empty())
+		return ("+" + modeOutputs + args);
 	return ("");
 }
 bool	Channel::auth(User* user, const std::string& password)
