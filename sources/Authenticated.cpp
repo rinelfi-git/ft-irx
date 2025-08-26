@@ -42,6 +42,8 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
+	if (!channel)
+		return ;
 	if (modes.empty())
 		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume());
 	else if (modes.at(0) != '+' && modes.at(0) != '-')
@@ -141,10 +143,17 @@ void	Authenticated::_tMode(const std::string& name, char action)
 
 void	Authenticated::_kMode(const std::string& name, char action, const std::string& password)
 {
+	Channel*	channel(IRCServer::getInstance().channel(name));
+
+	if (!channel)
+	{
+		send("403 " + _user->info().nick() + " " + name + " :No such channel");
+		return ;
+	}
 	if (action == '+')
-		std::cout << "set password to " << password << " in " << name << std::endl;
+		channel->setPassword(*_user, password);
 	else
-		std::cout << "delete password to " << password << " in " << name << std::endl;
+		channel->setPassword(*_user, "");
 }
 
 void	Authenticated::_oMode(const std::string& name, char action, const std::string& user)

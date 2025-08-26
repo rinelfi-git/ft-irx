@@ -36,5 +36,6 @@ public:
 	std::string			modeResume(const std::string& modes) const;
 	std::string			getUsers() const;
 	bool				auth(User* user, const std::string& password);
+	void				setPassword(const User& setter, const std::string& password);
 };
 #endif

@@ -45,19 +45,17 @@ void	Channel::setTopic(const User& setter, const std::string& set)
 
 void	Channel::getTopic(const User& requester) const
 {
-	(void)requester;
+	requester.socket().send("332 " + requester.info().nick() + " " + _name + " :" + _topic);
 }
 
 bool	Channel::isMember(const User& user) const
 {
-	(void)user;
-	return (true);
+	return (_members.find(user.info().nick()) != _members.end());
 }
 
 bool	Channel::isMember(const std::string& user) const
 {
-	(void)user;
-	return (true);
+	return (_members.find(user) != _members.end());
 }
 
 bool	Channel::isOperator(const User& user) const
@@ -73,14 +71,12 @@ bool	Channel::isOperator(const std::string& user) const
 
 bool	Channel::isInvited(const User& user) const
 {
-	(void)user;
-	return (true);
+	return (_inviteds.find(user.info().nick()) != _inviteds.end());
 }
 
 bool	Channel::isInvited(const std::string& user) const
 {
-	(void)user;
-	return (true);
+	return (_inviteds.find(user) != _inviteds.end());
 }
 
 const std::string&	Channel::name(void) const
@@ -166,6 +162,7 @@ std::string	Channel::modeResume(const std::string& modes) const
 }
 bool	Channel::auth(User* user, const std::string& password)
 {
+	std::cout << "User : " << user->info().nick() << " attempt to join channel " << _name << " with key '" << password << "' VS '" << _password << "'" << std::endl;
 	if (isInvited(*user))
 		return (true);
 	if (_mode.isInviteOnly() && !isInvited(*user))
@@ -184,4 +181,31 @@ bool	Channel::auth(User* user, const std::string& password)
 		return (false);
 	}
 	return (true);
+}
+
+void	Channel::setPassword(const User& setter, const std::string& password)
+{
+	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
+	if (!isOperator(setter))
+	{
+		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
+		return;
+	}
+	_password = password;
+	if (!password.empty())
+	{
+		while (itMember != _members.end())
+		{
+			User	member(*(itMember++)->second);
+			member.socket().send(":" + setter.networkId() + " MODE " + _name + " +k " + password);
+		}
+	}
+	else
+	{
+		while (itMember != _members.end())
+		{
+			User	member(*(itMember++)->second);
+			member.socket().send(":" + setter.networkId() + " MODE " + _name + " -k");
+		}
+	}
 }
