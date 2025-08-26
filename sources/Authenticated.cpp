@@ -4,6 +4,8 @@
 #include "User.hpp"
 #include "IRCServer.hpp"
 #include "Channel.hpp"
+#include <sstream>
+#include <string>
 
 Authenticated::Authenticated(int fd):
 	ASocketClient(fd),
@@ -49,6 +51,20 @@ void	Authenticated::_parseJoin(const std::string& arg)
 void	Authenticated::_parseInvite(const std::string& arg)
 {
 	(void)arg;
+}
+
+void	Authenticated::_parseTopic(const std::string& arg)
+{
+	std::stringstream	builder(arg);
+	std::string			name;
+	std::string			topic;
+	char				ddot;
+
+	builder >> name;
+	builder >> ddot;
+	std::getline(builder, topic);
+	Channel*	channel(IRCServer::getInstance().channel(name));
+	channel->setTopic(*_user, topic);
 }
 
 void	Authenticated::_iMode(bool enable, const std::string& name)
@@ -98,6 +114,7 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	actions["ping"] = &Authenticated::_parsePing;
 	actions["join"] = &Authenticated::_parseJoin;
 	actions["invite"] = &Authenticated::_parseInvite;
+	actions["topic"] = &Authenticated::_parseTopic;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())

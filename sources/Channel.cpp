@@ -30,9 +30,16 @@ void	Channel::invite(const User& host, const User& guest)
 	(void)guest;
 }
 
-void	Channel::setTopic(const std::string& set)
+void	Channel::setTopic(const User& setter, const std::string& set)
 {
-	(void)set;
+	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
+
+	_topic = set;
+	while (memberPtr != _members.end())
+	{
+		User	member(*(memberPtr++)->second);
+		member.socket().send("332 " + setter.info().nick() + " " + _name + " :" + _topic);
+	}
 }
 
 void	Channel::getTopic(const User& requester) const
@@ -98,6 +105,8 @@ void	Channel::join(User* user)
 	}
 	user->socket().send("353 " + nick + " = " + _name + " :" + getUsers());
 	user->socket().send("366 " + nick + " " + _name + " :End of /NAMES list.");
+	if (!_topic.empty())
+		user->socket().send("332 " + nick + " " + _name + " :" + _topic);
 }
 
 std::string Channel::getUsers() const

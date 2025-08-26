@@ -21,7 +21,7 @@ public:
 	Channel(const std::string& name, User* first);
 	void	message(const Message& msg) const;
 	void	invite(const User& host, const User& guest);
-	void	setTopic(const std::string& set);
+	void	setTopic(const User& setter, const std::string& set);
 	void	getTopic(const User& requester) const;
 	bool	isMember(const User& user) const;
 	bool	isMember(const std::string& user) const;

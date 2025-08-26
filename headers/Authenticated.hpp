@@ -16,6 +16,7 @@ private:
 	void	_parsePing(const std::string& arg);
 	void	_parseJoin(const std::string& arg);
 	void	_parseInvite(const std::string& arg);
+	void	_parseTopic(const std::string& arg);
 	void	_iMode(bool enable, const std::string& name);
 	void	_tMode(bool enable, const std::string& name);
 	void	_kMode(bool enable, const std::string& name, const std::string& password);
