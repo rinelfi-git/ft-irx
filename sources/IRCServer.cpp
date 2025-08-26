@@ -30,16 +30,13 @@ IRCServer::~IRCServer()
 {
 	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.begin());
 	std::map<std::string, User*>::iterator	userPtr(_users.begin());
+	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
 	while (socketClientPtr != _socketClients.end())
-	{
-		delete socketClientPtr->second;
-		++socketClientPtr;
-	}
+		delete (socketClientPtr++)->second;
 	while (userPtr != _users.end())
-	{
-		delete userPtr->second;
-		++userPtr;
-	}
+		delete (userPtr++)->second;
+	while (channelPtr != _channels.end())
+		delete (channelPtr++)->second;
 }
 
 void	IRCServer::_sigint(int num)
@@ -119,6 +116,7 @@ void	IRCServer::onDisconnect(int fd)
 	Authenticated*	auth(dynamic_cast<Authenticated*> (socket));
 	if (auth)
 	{
+		// disconnect user from all channels then
 		User*	user(auth->user());
 		std::string	nick(user->info().nick());
 		delete user;

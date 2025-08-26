@@ -13,6 +13,7 @@ private:
 	Authenticated*	_socket;
 public:
 	User(const UserInfo& info, Authenticated* socket);
+	User(const User& other);
 	~User();
 	std::string	networkld(void) const;
 	void	message(const Message& message);

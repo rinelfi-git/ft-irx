@@ -1,9 +1,10 @@
-#include <string>
-#include <map>
 #include "Channel.hpp"
 #include "Mode.hpp"
 #include "User.hpp"
 #include "Message.hpp"
+#include "Authenticated.hpp"
+#include <string>
+#include <map>
 
 Channel::Channel(const std::string& name, User* first):
 	_name(name),
@@ -86,27 +87,33 @@ const Mode&	Channel::mode(void) const
 
 void	Channel::join(User* user)
 {
-	(void)user;
+	std::string	nick( user->info().nick());
+	_members[nick] = user;
+	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
+
+	while (memberPtr != _members.end())
+	{
+		User	member(*(memberPtr++)->second);
+		member.socket().send(":" + user->networkld() + " JOIN " + _name);
+	}
+	user->socket().send("353 " + nick + " = " + _name + " :" + getUsers());
+	user->socket().send("366 " + nick + " " + _name + " :End of /NAMES list.");
 }
 
 std::string Channel::getUsers() const
 {
 	std::map<std::string, User*>::const_iterator	itOperator(_operators.begin());
 	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
-
 	std::string out;
 
 	while (itOperator != _operators.end())
-	{
-		out += " @" + itOperator->second->info().nick();
-		itOperator++;
-	}
+		out += " @" + (itOperator++)->second->info().nick();
 
 	while (itMember != _members.end())
 	{
-		if (!isOperator(*itMember->second))
-		out += " " + itMember->second->info().nick();
-		itMember++;
+		User	member(*(itMember++)->second);
+		if (!isOperator(member))
+			out += " " + member.info().nick();
 	}
 	return (out.substr(1));
 }
