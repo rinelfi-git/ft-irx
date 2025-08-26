@@ -61,6 +61,11 @@ void	IRCServer::joinChannel(const User& user, const std::string& name)
 
 bool	IRCServer::auth(const Pending& pending)
 {
+	if (user(pending.userInfo().nick()) != NULL)
+	{
+		pending.send("433 * " + pending.userInfo().nick() + " :Nickname is already in use");
+		return (false);
+	}
 	if (_password.empty() || pending.password() == _password)
 	{
 		User	created(_createUser(pending.userInfo(), pending));
