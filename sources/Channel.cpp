@@ -35,6 +35,11 @@ void	Channel::setTopic(const User& setter, const std::string& set)
 {
 	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
 
+	if (_mode.isTopicRestricted() && !isOperator(setter))
+	{
+		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
+		return ;
+	}
 	_topic = set;
 	while (memberPtr != _members.end())
 	{
@@ -237,5 +242,23 @@ void	Channel::setPassword(const User& setter, const std::string& password)
 			User	member(*(itMember++)->second);
 			member.socket().send(":" + setter.networkId() + " MODE " + _name + " -k");
 		}
+	}
+}
+
+void	Channel::setTopicMode(const User& setter, bool operatorOnly)
+{
+	std::string	msg(":" + setter.networkId() + " MODE " + _name + (operatorOnly ? " +t" : " -t"));
+	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
+
+	if (!isOperator(setter))
+	{
+		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
+		return ;
+	}
+	_mode.topicRestricted(operatorOnly);
+	while (itMember != _members.end())
+	{
+		User	member(*(itMember++)->second);
+		member.socket().send(msg);
 	}
 }

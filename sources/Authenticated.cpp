@@ -135,10 +135,14 @@ void	Authenticated::_iMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_tMode(const std::string& name, char action)
 {
-	if (action == '+')
-		std::cout << "restrict topic change to operator only " << name << std::endl;
-	else
-		std::cout << "delete topic change to operator only " << name << std::endl;
+	Channel*	channel(IRCServer::getInstance().channel(name));
+
+	if (!channel)
+	{
+		send("403 " + _user->info().nick() + " " + name + " :No such channel");
+		return ;
+	}
+	channel->setTopicMode(*_user, action == '+');
 }
 
 void	Authenticated::_kMode(const std::string& name, char action, const std::string& password)
