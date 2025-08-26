@@ -21,9 +21,8 @@ class IRCServer: public ASocketServerObserver
 		std::map<std::string, Channel*>	_channels;
 		static IRCServer*	_instance;
         User&	_createUser(const UserInfo& info, const Pending& pending);
-        void	_createChannel(User first, std::string name);
 		static void	_sigint(int num);
-    public:
+        public:
         static IRCServer& getInstance(void);
         IRCServer(const std::string& password);
         ~IRCServer();
@@ -34,5 +33,6 @@ class IRCServer: public ASocketServerObserver
 		virtual void	onConnect(int fd);
 		virtual void	onData(int fd, const std::string& data);
 		virtual void	onDisconnect(int fd);
+        void	createChannel(const std::string& name, User* first);
 };
 #endif

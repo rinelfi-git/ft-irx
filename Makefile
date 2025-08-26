@@ -8,7 +8,9 @@ SRCs = \
 	abstract/ASocketServerObserver.cpp \
 	ArgValidator.cpp \
 	Authenticated.cpp \
+	Channel.cpp \
 	IRCServer.cpp \
+	Mode.cpp \
 	Pending.cpp \
 	SocketServer.cpp \
 	User.cpp \

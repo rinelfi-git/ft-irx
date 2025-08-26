@@ -2,6 +2,8 @@
 #include "ASocketClient.hpp"
 #include "Pending.hpp"
 #include "User.hpp"
+#include "IRCServer.hpp"
+#include "Channel.hpp"
 
 Authenticated::Authenticated(int fd):
 	ASocketClient(fd),
@@ -33,7 +35,15 @@ void	Authenticated::_parsePing(const std::string& arg)
 
 void	Authenticated::_parseJoin(const std::string& arg)
 {
-	(void)arg;
+	Channel *channel = IRCServer::getInstance().channel(arg);
+	if (!channel)
+	{
+		IRCServer::getInstance().createChannel(arg, _user);
+	}
+	else
+	{
+		channel->join(_user);
+	}
 }
 
 void	Authenticated::_parseInvite(const std::string& arg)

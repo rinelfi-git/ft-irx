@@ -138,3 +138,9 @@ User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
 	_socketClients[fd] = socket;
 	return *user;
 }
+
+void	IRCServer::createChannel(const std::string& name, User* first)
+ {
+	Channel *channel = new Channel(name, first);
+	_channels[name] = channel; 
+ }
