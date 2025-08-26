@@ -5,6 +5,7 @@
 #include "Authenticated.hpp"
 #include <string>
 #include <map>
+#include <sstream>
 
 Channel::Channel(const std::string& name, User* first):
 	_name(name),
@@ -101,7 +102,7 @@ void	Channel::join(User* user)
 	while (memberPtr != _members.end())
 	{
 		User	member(*(memberPtr++)->second);
-		member.socket().send(":" + user->networkld() + " JOIN " + _name);
+		member.socket().send(":" + user->networkId() + " JOIN " + _name);
 	}
 	user->socket().send("353 " + nick + " = " + _name + " :" + getUsers());
 	user->socket().send("366 " + nick + " " + _name + " :End of /NAMES list.");
@@ -127,4 +128,37 @@ std::string Channel::getUsers() const
 			out += " " + member.info().nick();
 	}
 	return (out.substr(1));
+}
+
+std::string	Channel::modeResume(void) const
+{
+	std::string	modes;
+	std::string	args;
+	if (_mode.isInviteOnly())
+		modes += "i";
+	if (_mode.isTopicRestricted())
+		modes += "t";
+	if (_mode.memberLimit())
+	{
+		modes += "l";
+		std::stringstream	builder;
+		std::string			limit;
+		builder << _mode.memberLimit();
+		builder >> limit;
+		args += " " + limit;
+	}
+	if (!_password.empty())
+	{
+		modes += "k";
+		args += " " + _password;
+	}
+	if (!modes.empty())
+		return ("+" + modes + args);
+	return ("");
+}
+
+std::string	Channel::modeResume(const std::string& modes) const
+{
+	(void) modes;
+	return ("");
 }

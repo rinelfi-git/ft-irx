@@ -23,7 +23,7 @@ void	User::message(const Message& message)
 	(void) message;
 }
 
-std::string	User::networkld(void) const
+std::string	User::networkId(void) const
 {
 	return (_info.nick() + "!" + _info.uname() + "@" + _info.host());
 }

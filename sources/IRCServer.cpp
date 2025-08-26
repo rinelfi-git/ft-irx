@@ -64,7 +64,7 @@ bool	IRCServer::auth(const Pending& pending)
 	if (_password.empty() || pending.password() == _password)
 	{
 		User	created(_createUser(pending.userInfo(), pending));
-		created.socket().send("001 " + created.info().nick() + " :Welcome to the Internet Relay Network " + created.networkld());
+		created.socket().send("001 " + created.info().nick() + " :Welcome to the Internet Relay Network " + created.networkId());
 		return true;
 	}
 	pending.send("464 * :Password incorrect");
@@ -141,7 +141,7 @@ void	IRCServer::createChannel(const std::string& name, User* first)
  {
 	Channel *channel = new Channel(name, first);
 	_channels[name] = channel;
-	first->socket().send(":" + first->networkld() + " JOIN " + name);
+	first->socket().send(":" + first->networkId() + " JOIN " + name);
 	first->socket().send("353 " + first->info().nick() + " = " + name + " :" + channel->getUsers());
 	first->socket().send("366 " + first->info().nick() + " " + name + " :End of /NAMES list.");
  }

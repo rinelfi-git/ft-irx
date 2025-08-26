@@ -34,5 +34,7 @@ public:
 	const Mode&			mode(void) const;
 
 	std::string getUsers() const;
+	std::string	modeResume(void) const;
+	std::string	modeResume(const std::string& modes) const;
 };
 #endif

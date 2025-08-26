@@ -22,7 +22,61 @@ Authenticated::~Authenticated()
 
 void	Authenticated::_parseMode(const std::string& arg)
 {
-	(void)arg;
+	std::stringstream	builder(arg);
+	std::string			name;
+	std::string			modes;
+	std::string			args;
+	builder >> name;
+	builder >> modes;
+	std::map<std::string, void (Authenticated::*)(const std::string&, char, const std::string&)>	withParameter;
+	std::map<std::string, void (Authenticated::*)(const std::string&, char)>	withoutParameter;
+	withoutParameter["-l"] = &Authenticated::_lMode;
+	withoutParameter["-t"] = &Authenticated::_tMode;
+	withoutParameter["+t"] = &Authenticated::_tMode;
+	withParameter["-k"] = &Authenticated::_kMode;
+	withParameter["+k"] = &Authenticated::_kMode;
+	withParameter["-o"] = &Authenticated::_oMode;
+	withParameter["+o"] = &Authenticated::_oMode;
+	withParameter["-i"] = &Authenticated::_iMode;
+	withParameter["+i"] = &Authenticated::_iMode;
+	withParameter["+l"] = &Authenticated::_lMode;
+
+	Channel*	channel(IRCServer::getInstance().channel(name));
+	if (modes.empty())
+		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume());
+	else if (modes.at(0) != '+' && modes.at(0) != '-')
+		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume(modes));
+	else
+	{
+		char	action = modes.at(0);
+		bool	hasNextParams(!builder.eof());
+		builder >> args;
+		std::string::const_iterator	itMode(modes.begin());
+		while (itMode != modes.end())
+		{
+			char	c(*itMode++);
+			if (c == '+' || c == '-')
+			{
+				action = c;
+				continue ;
+			}
+			std::string	mode(1, action);
+			mode += std::string(1, c);
+			if (withoutParameter.find(mode) != withoutParameter.end())
+				(this->*withoutParameter.at(mode))(name, action);
+			else if (withParameter.find(mode) != withParameter.end())
+			{
+				if (hasNextParams)
+				{
+					(this->*withParameter.at(mode))(name, action, args);
+					hasNextParams = !builder.eof();
+					builder >> args;
+				}
+				else
+					send("461 " + _user->info().nick() + " MODE :Not enough parameters");
+			}
+		}
+	}
 }
 
 void	Authenticated::_parsePrivMsg(const std::string& arg)
@@ -67,42 +121,48 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	channel->setTopic(*_user, topic);
 }
 
-void	Authenticated::_iMode(bool enable, const std::string& name)
+void	Authenticated::_iMode(const std::string& name, char action, const std::string& user)
 {
-	(void)enable;
-	(void)name;
+	if (action == '+')
+		std::cout << "Invite " << user << " in " << name << std::endl;
+	else
+		std::cout << "Remove invite " << user << " in " << name << std::endl;
 }
 
-void	Authenticated::_tMode(bool enable, const std::string& name)
+void	Authenticated::_tMode(const std::string& name, char action)
 {
-	(void)enable;
-	(void)name;
-
-
+	if (action == '+')
+		std::cout << "restrict topic change to operator only " << name << std::endl;
+	else
+		std::cout << "delete topic change to operator only " << name << std::endl;
 }
 
-void	Authenticated::_kMode(bool enable, const std::string& name, const std::string& password)
+void	Authenticated::_kMode(const std::string& name, char action, const std::string& password)
 {
-	(void)enable;
-	(void)name;
-	(void)password;
-
+	if (action == '+')
+		std::cout << "set password to " << password << " in " << name << std::endl;
+	else
+		std::cout << "delete password to " << password << " in " << name << std::endl;
 }
 
-void	Authenticated::_oMode(bool enable, const std::string& name, const std::string& user)
+void	Authenticated::_oMode(const std::string& name, char action, const std::string& user)
 {
-	(void)enable;
-	(void)name;
-	(void)user;
-
+	if (action == '+')
+		std::cout << "invite operator " << user << " in " << name << std::endl;
+	else
+		std::cout << "remove operator " << user << " from " << name << std::endl;
 }
 
-void	Authenticated::_lMode(bool enable, const std::string& name, const std::string& limit)
+void	Authenticated::_lMode(const std::string& name, char action, const std::string& limit)
 {
-	(void)enable;
-	(void)name;
-	(void)limit;
+	(void)action;
+	std::cout << "set limit in " << name << " to " << limit << std::endl;
+}
 
+void	Authenticated::_lMode(const std::string& name, char action)
+{
+	(void)action;
+	std::cout << "delete limit in " << name << std::endl;
 }
 
 void	Authenticated::parse(const std::map<std::string, std::string>& cmds)

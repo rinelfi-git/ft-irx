@@ -17,11 +17,12 @@ private:
 	void	_parseJoin(const std::string& arg);
 	void	_parseInvite(const std::string& arg);
 	void	_parseTopic(const std::string& arg);
-	void	_iMode(bool enable, const std::string& name);
-	void	_tMode(bool enable, const std::string& name);
-	void	_kMode(bool enable, const std::string& name, const std::string& password);
-	void	_oMode(bool enable, const std::string& name, const std::string& user);
-	void	_lMode(bool enable, const std::string& name, const std::string& limit);
+	void	_tMode(const std::string& name, char action);
+	void	_iMode(const std::string& name, char action, const std::string& user);
+	void	_kMode(const std::string& name, char action, const std::string& password);
+	void	_oMode(const std::string& name, char action, const std::string& user);
+	void	_lMode(const std::string& name, char action, const std::string& limit);
+	void	_lMode(const std::string& name, char action);
 protected:
 	virtual void	parse(const std::map<std::string, std::string>& cmds);
 public:

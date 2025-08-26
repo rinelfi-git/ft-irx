@@ -15,7 +15,7 @@ public:
 	User(const UserInfo& info, Authenticated* socket);
 	User(const User& other);
 	~User();
-	std::string	networkld(void) const;
+	std::string	networkId(void) const;
 	void	message(const Message& message);
 	const UserInfo& info(void) const;
 	const Authenticated& socket(void) const;
