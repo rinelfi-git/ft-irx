@@ -2,8 +2,8 @@
 
 Mode::Mode(void):
 	_inviteOnly(false),
-	_topicRestricted(false),
-	_memberLimit(0)
+	_memberLimit(0),
+	_topicRestricted(false)
 {}
 
 Mode::~Mode()

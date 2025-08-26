@@ -29,7 +29,7 @@ public:
 	bool	isOperator(const std::string& user) const;
 	bool	isInvited(const User& user) const;
 	bool	isInvited(const std::string& user) const;
-	void	join(const User& user);
+	void	join(User* user);
 	const std::string&	name(void) const;
 	const Mode&			mode(void) const;
 };
