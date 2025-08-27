@@ -3,6 +3,7 @@
 #include "UserInfo.hpp"
 #include "IRCServer.hpp"
 #include "utils.hpp"
+#include "User.hpp"
 #include <string>
 #include <map>
 #include <sstream>
@@ -21,6 +22,11 @@ bool	Pending::auth(void)
 {
 	if (!_userInfo.complete())
 		return (false);
+	if (User::isNickName(_userInfo.nick()) == false)
+	{
+		send("432 * " + _userInfo.nick() + " :Erroneous nickname");
+		return (false);
+	}
 	return IRCServer::getInstance().auth(*this);
 }
 
