@@ -16,8 +16,8 @@ Channel::Channel(const std::string& name, User* first):
 	_operators(),
 	_inviteds()
 {
-	_members[first->info().nick()] = first;
-	_operators[first->info().nick()] = first;
+	_members[first->id()] = first;
+	_operators[first->id()] = first;
 }
 
 void	Channel::message(const Message& msg) const
@@ -55,33 +55,33 @@ void	Channel::getTopic(const User& requester) const
 
 bool	Channel::isMember(const User& user) const
 {
-	return (_members.find(user.info().nick()) != _members.end());
+	return (_members.find(user.id()) != _members.end());
 }
 
-bool	Channel::isMember(const std::string& user) const
+bool	Channel::isMember(const std::string& id) const
 {
-	return (_members.find(user) != _members.end());
+	return (_members.find(id) != _members.end());
 }
 
 bool	Channel::isOperator(const User& user) const
 {
 	
-	return (_operators.find(user.info().nick()) != _operators.end());
+	return (_operators.find(user.id()) != _operators.end());
 }
 
-bool	Channel::isOperator(const std::string& user) const
+bool	Channel::isOperator(const std::string& id) const
 {
-	return (_operators.find(user) != _operators.end());
+	return (_operators.find(id) != _operators.end());
 }
 
 bool	Channel::isInvited(const User& user) const
 {
-	return (_inviteds.find(user.info().nick()) != _inviteds.end());
+	return (_inviteds.find(user.id()) != _inviteds.end());
 }
 
-bool	Channel::isInvited(const std::string& user) const
+bool	Channel::isInvited(const std::string& id) const
 {
-	return (_inviteds.find(user) != _inviteds.end());
+	return (_inviteds.find(id) != _inviteds.end());
 }
 
 const std::string&	Channel::name(void) const
@@ -98,8 +98,8 @@ void	Channel::join(User* user)
 {
 	if (isMember(*user))
 		return;
-	std::string	nick( user->info().nick());
-	_members[nick] = user;
+	std::string	id(user->id());
+	_members[id] = user;
 	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
 
 	while (memberPtr != _members.end())
@@ -107,12 +107,12 @@ void	Channel::join(User* user)
 		User	member(*(memberPtr++)->second);
 		member.socket().send(":" + user->networkId() + " JOIN " + _name);
 	}
-	user->socket().send("353 " + nick + " = " + _name + " :" + getUsers());
-	user->socket().send("366 " + nick + " " + _name + " :End of /NAMES list.");
+	user->socket().send("353 " + id + " = " + _name + " :" + getUsers());
+	user->socket().send("366 " + id + " " + _name + " :End of /NAMES list.");
 	if (!_topic.empty())
-		user->socket().send("332 " + nick + " " + _name + " :" + _topic);
+		user->socket().send("332 " + id + " " + _name + " :" + _topic);
 	else
-		user->socket().send("331 " + nick + " " + _name + " :No topic is set");
+		user->socket().send("331 " + id + " " + _name + " :No topic is set");
 }
 
 std::string Channel::getUsers() const
@@ -265,10 +265,10 @@ void	Channel::setTopicMode(const User& setter, bool operatorOnly)
 
 void	Channel::quit(const User& user, const std::string& msg)
 {
-	std::string	nick(user.info().nick());
-	_members.erase(nick);
-	_operators.erase(nick);
-	_inviteds.erase(nick);
+	std::string	id(user.id());
+	_members.erase(id);
+	_operators.erase(id);
+	_inviteds.erase(id);
 	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
 
 	while (memberPtr != _members.end())
@@ -276,4 +276,19 @@ void	Channel::quit(const User& user, const std::string& msg)
 		User	member(*(memberPtr++)->second);
 		member.socket().send(":" + user.networkId() + " QUIT " + msg);
 	}
+}
+
+bool	Channel::isChannelName(const std::string& str)
+{
+	if (str.empty() || str.length() > 200)
+		return (false);
+	if (str.at(0) != '#')
+		return (false);
+	for (std::string::const_iterator	itStr(str.begin() + 1); itStr != str.end(); itStr++)
+	{
+		const char	c(*itStr);
+		if (!std::isalnum(c) && c != '#' && c != '-' && c != '_')
+			return (false);
+	}
+	return (true);
 }

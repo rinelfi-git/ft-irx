@@ -8,6 +8,7 @@
 class	Pending: public ASocketClient
 {
 private:
+	std::string	_id;
 	UserInfo	_userInfo;
 	std::string	_password;
 	void	_parseNick(const std::string& in);
@@ -22,5 +23,6 @@ public:
 	bool	auth(void);
 	const std::string&	password(void) const;
 	const UserInfo&	userInfo(void) const;
+	const std::string&	id(void) const;
 };
 #endif

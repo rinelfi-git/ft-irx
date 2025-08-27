@@ -31,12 +31,13 @@ IRCServer::~IRCServer()
 	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.begin());
 	std::map<std::string, User*>::iterator	userPtr(_users.begin());
 	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
+
+	while (channelPtr != _channels.end())
+		delete (channelPtr++)->second;
 	while (socketClientPtr != _socketClients.end())
 		delete (socketClientPtr++)->second;
 	while (userPtr != _users.end())
 		delete (userPtr++)->second;
-	while (channelPtr != _channels.end())
-		delete (channelPtr++)->second;
 }
 
 void	IRCServer::_sigint(int num)
@@ -55,7 +56,7 @@ IRCServer&	IRCServer::getInstance(void)
 
 bool	IRCServer::auth(const Pending& pending)
 {
-	if (user(pending.userInfo().nick()) != NULL)
+	if (user(pending.id()))
 	{
 		pending.send("433 * " + pending.userInfo().nick() + " :Nickname is already in use");
 		return (false);
@@ -118,17 +119,17 @@ void	IRCServer::onDisconnect(int fd)
 	if (auth)
 	{
 		User*	user(auth->user());
-		std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
-		const std::string	nick(user->info().nick());
-		while (channelPtr != _channels.end())
+		std::map<std::string, Channel*>::iterator	itChannel(_channels.begin());
+		const std::string	id(user->id());
+		while (itChannel != _channels.end())
 		{
-			Channel*	channel(channelPtr->second);
+			Channel*	channel(itChannel->second);
 			if (channel->isMember(*user))
 				channel->quit(*user, ":My connection was interrupted");
-			channelPtr++;
+			itChannel++;
 		}
 		delete user;
-		_users.erase(nick);
+		_users.erase(id);
 	}
 	delete	socket;
 	_socketClients.erase(fd);
@@ -139,7 +140,7 @@ User&	IRCServer::_createUser(const UserInfo& info, const Pending& pending)
 	ASocketClient*	socket(new Authenticated(pending));
 	User*			user(new User(info, dynamic_cast<Authenticated*>(socket)));
 	const int		fd(pending.fd());
-	_users[info.nick()] = user;
+	_users[user->id()] = user;
 	delete _socketClients.at(fd);
 	_socketClients[fd] = socket;
 	return *user;
@@ -157,7 +158,6 @@ void	IRCServer::createChannel(const std::string& name, User* first)
 void	IRCServer::quit(const User& user, const std::string& msg)
 {
 	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
-	const std::string	nick(user.info().nick());
 	while (channelPtr != _channels.end())
 	{
 		Channel*	channel((channelPtr++)->second);

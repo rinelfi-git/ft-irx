@@ -2,12 +2,14 @@
 #include "ASocketClient.hpp"
 #include "UserInfo.hpp"
 #include "IRCServer.hpp"
+#include "utils.hpp"
 #include <string>
 #include <map>
 #include <sstream>
 
 Pending::Pending(int fd):
 	ASocketClient(fd),
+	_id(),
 	_userInfo(),
 	_password()
 {}
@@ -43,6 +45,7 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 void	Pending::_parseNick(const std::string& in)
 {
 	_userInfo.nick(in);
+	_id = strToLower(in);
 }
 
 void	Pending::_parsePass(const std::string& in)
@@ -92,4 +95,9 @@ const std::string&	Pending::password() const
 const UserInfo&	Pending::userInfo() const
 {
 	return (_userInfo);
+}
+
+const std::string&	Pending::id(void) const
+{
+	return (_id);
 }

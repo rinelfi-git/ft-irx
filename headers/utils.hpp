@@ -7,4 +7,7 @@
 
 std::string	strToLower(const std::string& str);
 bool		isnumber(const std::string& str);
+bool		isLower(char c);
+bool		isUpper(char c);
+bool		isAlpha(char c);
 #endif

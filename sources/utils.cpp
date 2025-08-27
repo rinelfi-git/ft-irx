@@ -30,3 +30,18 @@ bool	isnumber(const std::string& str)
 	}
 	return (true);
 }
+
+bool	isLower(char c)
+{
+	return (c >= 'a' && c <= 'z');
+}
+
+bool	isUpper(char c)
+{
+	return (c >= 'A' && c <= 'Z');
+}
+
+bool	isAlpha(char c)
+{
+	return (isLower(c) || isUpper(c));
+}
