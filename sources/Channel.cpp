@@ -300,3 +300,19 @@ void	Channel::broadcast(const std::string& msg) const
 	while (itMember != _members.end())
 		(itMember++)->second->socket().send(msg);
 }
+void	Channel::kick(const User& op, const User& member , const std::string& message)
+{
+	if (!isOperator(op))
+	{
+		op.socket().send("482 " + op.info().nick() + " " + _name + " :You're not channel operator");
+		return ;
+	}
+	if (!isMember(member))
+	{
+		op.socket().send("441 " + op.info().nick() + " " + _name +" " + member.info().nick() + " :They aren't on that channel");
+		return ;
+	}
+	broadcast(":" + op.networkId() + " KICK " + _name +" " + member.info().nick() + " " + message);
+	_members.erase(member.id());
+}
+

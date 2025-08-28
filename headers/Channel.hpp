@@ -41,5 +41,6 @@ public:
 	void				quit(const User& user, const std::string& msg);
 	static bool			isChannelName(const std::string& str);
 	void				broadcast(const std::string& msg) const;
+	void				kick(const User& op, const User& member, const std::string& message);
 };
 #endif
