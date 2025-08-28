@@ -131,12 +131,14 @@ void	Authenticated::_parseKick(const std::string& arg)
 	std::string channel_name;
 	std::string nick_user;
 	std::string message;
+	Channel*	channel;
+	User*		member;
 
 	ss >> channel_name;
 	ss >> nick_user;
 	std::getline(ss, message);
-	Channel*	channel(IRCServer::getInstance().channel(channel_name));
-	User *member = IRCServer::getInstance().user(nick_user);
+	channel = IRCServer::getInstance().channel(channel_name);
+	member = IRCServer::getInstance().user(nick_user);
 	if (!member)
 	{
 		send("401 " + _user->info().nick() + " " + nick_user + " :No such nick");

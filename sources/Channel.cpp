@@ -33,19 +33,13 @@ void	Channel::invite(const User& host, const User& guest)
 
 void	Channel::setTopic(const User& setter, const std::string& set)
 {
-	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
-
 	if (_mode.isTopicRestricted() && !isOperator(setter))
 	{
 		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
 		return ;
 	}
 	_topic = set;
-	while (memberPtr != _members.end())
-	{
-		User	member(*(memberPtr++)->second);
-		member.socket().send("332 " + setter.info().nick() + " " + _name + " :" + _topic);
-	}
+	broadcast("332 " + setter.info().nick() + " " + _name + " :" + _topic);
 }
 
 void	Channel::getTopic(const User& requester) const
@@ -100,13 +94,7 @@ void	Channel::join(User* user)
 		return;
 	std::string	id(user->id());
 	_members[id] = user;
-	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
-
-	while (memberPtr != _members.end())
-	{
-		User	member(*(memberPtr++)->second);
-		member.socket().send(":" + user->networkId() + " JOIN " + _name);
-	}
+	broadcast(":" + user->networkId() + " JOIN " + _name);
 	user->socket().send("353 " + id + " = " + _name + " :" + getUsers());
 	user->socket().send("366 " + id + " " + _name + " :End of /NAMES list.");
 	if (!_topic.empty())
@@ -220,7 +208,6 @@ bool	Channel::auth(User* user, const std::string& password)
 
 void	Channel::setPassword(const User& setter, const std::string& password)
 {
-	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
 	if (!isOperator(setter))
 	{
 		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
@@ -228,39 +215,20 @@ void	Channel::setPassword(const User& setter, const std::string& password)
 	}
 	_password = password;
 	if (!password.empty())
-	{
-		while (itMember != _members.end())
-		{
-			User	member(*(itMember++)->second);
-			member.socket().send(":" + setter.networkId() + " MODE " + _name + " +k " + password);
-		}
-	}
+		broadcast(":" + setter.networkId() + " MODE " + _name + " +k " + password);
 	else
-	{
-		while (itMember != _members.end())
-		{
-			User	member(*(itMember++)->second);
-			member.socket().send(":" + setter.networkId() + " MODE " + _name + " -k");
-		}
-	}
+		broadcast(":" + setter.networkId() + " MODE " + _name + " -k");
 }
 
 void	Channel::setTopicMode(const User& setter, bool operatorOnly)
 {
-	std::string	msg(":" + setter.networkId() + " MODE " + _name + (operatorOnly ? " +t" : " -t"));
-	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
-
 	if (!isOperator(setter))
 	{
 		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
 		return ;
 	}
 	_mode.topicRestricted(operatorOnly);
-	while (itMember != _members.end())
-	{
-		User	member(*(itMember++)->second);
-		member.socket().send(msg);
-	}
+	broadcast(":" + setter.networkId() + " MODE " + _name + (operatorOnly ? " +t" : " -t"));
 }
 
 void	Channel::quit(const User& user, const std::string& msg)
@@ -269,13 +237,7 @@ void	Channel::quit(const User& user, const std::string& msg)
 	_members.erase(id);
 	_operators.erase(id);
 	_inviteds.erase(id);
-	std::map<std::string, User*>::const_iterator	memberPtr(_members.begin());
-
-	while (memberPtr != _members.end())
-	{
-		User	member(*(memberPtr++)->second);
-		member.socket().send(":" + user.networkId() + " QUIT " + msg);
-	}
+	broadcast(":" + user.networkId() + " QUIT " + msg);
 }
 
 bool	Channel::isChannelName(const std::string& str)
@@ -300,6 +262,7 @@ void	Channel::broadcast(const std::string& msg) const
 	while (itMember != _members.end())
 		(itMember++)->second->socket().send(msg);
 }
+
 void	Channel::kick(const User& op, const User& member , const std::string& message)
 {
 	if (!isOperator(op))
@@ -315,4 +278,3 @@ void	Channel::kick(const User& op, const User& member , const std::string& messa
 	broadcast(":" + op.networkId() + " KICK " + _name +" " + member.info().nick() + " " + message);
 	_members.erase(member.id());
 }
-
