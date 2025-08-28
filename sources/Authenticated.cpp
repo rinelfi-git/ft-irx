@@ -88,7 +88,7 @@ void	Authenticated::_parsePrivMsg(const std::string& arg)
 
 void	Authenticated::_parsePing(const std::string& arg)
 {
-	send("pong " + arg);
+	send("PONG " + arg);
 }
 
 void	Authenticated::_parseJoin(const std::string& arg)
