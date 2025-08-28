@@ -292,3 +292,11 @@ bool	Channel::isChannelName(const std::string& str)
 	}
 	return (true);
 }
+
+void	Channel::broadcast(const std::string& msg) const
+{
+	std::map<std::string, User*>::const_iterator	itMember(_members.begin());
+
+	while (itMember != _members.end())
+		(itMember++)->second->socket().send(msg);
+}

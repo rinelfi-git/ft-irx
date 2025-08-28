@@ -40,5 +40,6 @@ public:
 	void				setTopicMode(const User& setter, bool operatorOnly);
 	void				quit(const User& user, const std::string& msg);
 	static bool			isChannelName(const std::string& str);
+	void				broadcast(const std::string& msg) const;
 };
 #endif
