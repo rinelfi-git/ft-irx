@@ -42,8 +42,8 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
-	if (!channel)
-		return ;
+	if (Channel::isChannelName(name) && !channel)
+		return	send("403 " + _user->info().nick() + " " + name + " :No such channel");
 	if (modes.empty())
 		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume());
 	else if (modes.at(0) != '+' && modes.at(0) != '-')
