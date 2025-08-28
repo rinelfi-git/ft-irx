@@ -116,35 +116,31 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	std::stringstream	builder(arg);
 	std::string			name;
 	std::string			topic;
-	char				ddot;
+	Channel*			channel;
 
 	builder >> name;
-	builder >> ddot;
 	std::getline(builder, topic);
-	Channel*	channel(IRCServer::getInstance().channel(name));
-	channel->setTopic(*_user, topic);
+	channel = IRCServer::getInstance().channel(name);
+	channel->setTopic(*_user, topic.substr(topic.find(':') + 1));
 }
 
 void	Authenticated::_parseKick(const std::string& arg)
 {
 	std::stringstream ss(arg);
-	std::string channel_name;
-	std::string nick_user;
+	std::string channelName;
+	std::string nickUser;
 	std::string message;
 	Channel*	channel;
 	User*		member;
 
-	ss >> channel_name;
-	ss >> nick_user;
+	ss >> channelName;
+	ss >> nickUser;
 	std::getline(ss, message);
-	channel = IRCServer::getInstance().channel(channel_name);
-	member = IRCServer::getInstance().user(nick_user);
+	channel = IRCServer::getInstance().channel(channelName);
+	member = IRCServer::getInstance().user(nickUser);
 	if (!member)
-	{
-		send("401 " + _user->info().nick() + " " + nick_user + " :No such nick");
-		return ;
-	}
-	channel->kick(*_user, *member, message);
+		return send("401 " + _user->info().nick() + " " + nickUser + " :No such nick");
+	channel->kick(*_user, *member, message.substr(message.find(':')));
 }
 
 void	Authenticated::_parseQuit(const std::string& arg)
@@ -165,10 +161,7 @@ void	Authenticated::_tMode(const std::string& name, char action)
 	Channel*	channel(IRCServer::getInstance().channel(name));
 
 	if (!channel)
-	{
-		send("403 " + _user->info().nick() + " " + name + " :No such channel");
-		return ;
-	}
+		return	send("403 " + _user->info().nick() + " " + name + " :No such channel");
 	channel->setTopicMode(*_user, action == '+');
 }
 
@@ -177,10 +170,7 @@ void	Authenticated::_kMode(const std::string& name, char action, const std::stri
 	Channel*	channel(IRCServer::getInstance().channel(name));
 
 	if (!channel)
-	{
-		send("403 " + _user->info().nick() + " " + name + " :No such channel");
-		return ;
-	}
+		return send("403 " + _user->info().nick() + " " + name + " :No such channel");
 	if (action == '+')
 		channel->setPassword(*_user, password);
 	else
@@ -223,10 +213,9 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())
 	{
-		std::map<std::string, std::string>::const_iterator	cmdPtr(cmds.find(actionPtr->first));
+		std::map<std::string, std::string>::const_iterator	cmdPtr(cmds.find((actionPtr++)->first));
 		if (cmdPtr != cmds.end())
 			(this->*actions.at(cmdPtr->first))(cmdPtr->second);
-		actionPtr++;
 	}
 }
 

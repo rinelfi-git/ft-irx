@@ -6,6 +6,7 @@
 #include "UserInfo.hpp"
 #include "Pending.hpp"
 #include "Authenticated.hpp"
+#include "utils.hpp"
 #include <string>
 #include <stdexcept>
 #include <iostream>
@@ -73,7 +74,7 @@ bool	IRCServer::auth(const Pending& pending)
 
 User*	IRCServer::user(const std::string& nick) const
 {
-	std::map<std::string, User*>::const_iterator	userPtr(_users.find(nick));
+	std::map<std::string, User*>::const_iterator	userPtr(_users.find(strToLower(nick)));
 	if (userPtr != _users.end())
 		return (userPtr->second);
 	return (NULL);
