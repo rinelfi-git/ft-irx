@@ -4,6 +4,7 @@
 #include "User.hpp"
 #include "IRCServer.hpp"
 #include "Channel.hpp"
+#include "Response.hpp"
 #include <sstream>
 #include <string>
 
@@ -42,12 +43,14 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
+	if (User::isNickName(name))
+		return ;
 	if (Channel::isChannelName(name) && !channel)
-		return	send("403 " + _user->info().nick() + " " + name + " :No such channel");
+		return	Response(*this).errNoSuchChannel(_user->info().nick(), name);
 	if (modes.empty())
-		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume());
+		return Response(*this).rplChannelModeIs(_user->info().nick(), *channel);
 	else if (modes.at(0) != '+' && modes.at(0) != '-')
-		send("324 " + _user->info().nick() + " " + name + " :" + channel->modeResume(modes));
+		return Response(*this).rplChannelModeIs(_user->info().nick(), *channel, modes);
 	else
 	{
 		char	action = modes.at(0);
@@ -75,7 +78,7 @@ void	Authenticated::_parseMode(const std::string& arg)
 					builder >> args;
 				}
 				else
-					send("461 " + _user->info().nick() + " MODE :Not enough parameters");
+					return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 			}
 		}
 	}
@@ -139,7 +142,7 @@ void	Authenticated::_parseKick(const std::string& arg)
 	channel = IRCServer::getInstance().channel(channelName);
 	member = IRCServer::getInstance().user(nickUser);
 	if (!member)
-		return send("401 " + _user->info().nick() + " " + nickUser + " :No such nick");
+		return Response(*this).errNoSuchNick(_user->info().nick(), nickUser);
 	channel->kick(*_user, *member, message.substr(message.find(':')));
 }
 
@@ -161,7 +164,7 @@ void	Authenticated::_tMode(const std::string& name, char action)
 	Channel*	channel(IRCServer::getInstance().channel(name));
 
 	if (!channel)
-		return	send("403 " + _user->info().nick() + " " + name + " :No such channel");
+		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
 	channel->setTopicMode(*_user, action == '+');
 }
 
@@ -170,7 +173,7 @@ void	Authenticated::_kMode(const std::string& name, char action, const std::stri
 	Channel*	channel(IRCServer::getInstance().channel(name));
 
 	if (!channel)
-		return send("403 " + _user->info().nick() + " " + name + " :No such channel");
+		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
 	if (action == '+')
 		channel->setPassword(*_user, password);
 	else

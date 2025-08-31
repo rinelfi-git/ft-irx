@@ -12,6 +12,7 @@ SRCs = \
 	IRCServer.cpp \
 	Mode.cpp \
 	Pending.cpp \
+	Response.cpp \
 	SocketServer.cpp \
 	User.cpp \
 	UserInfo.cpp \
