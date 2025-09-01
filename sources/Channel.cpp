@@ -83,7 +83,7 @@ const std::string&	Channel::name(void) const
 	return (_name);
 }
 
-const Mode&	Channel::mode(void) const
+Mode&	Channel::mode(void)
 {
 	return (_mode);
 }

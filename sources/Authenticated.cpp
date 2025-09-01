@@ -76,6 +76,14 @@ void	Authenticated::_parseMode(const std::string& arg)
 					hasNextParams = !builder.eof();
 					builder >> args;
 				}
+				else if (modes.compare("+i") == 0)
+				{
+					channel->mode().inviteOnly(true);
+				}
+				else if (modes.compare("-i") == 0)
+				{
+					channel->mode().inviteOnly(false);
+				}
 				else
 					send("461 " + _user->info().nick() + " MODE :Not enough parameters");
 			}
