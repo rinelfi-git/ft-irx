@@ -31,7 +31,7 @@ public:
 	bool	isInvited(const std::string& id) const;
 	void	join(User* user);
 	const std::string&	name(void) const;
-	const Mode&			mode(void) const;
+	Mode&				mode(void);
 	std::string			modeResume(void) const;
 	std::string			modeResume(const std::string& modes) const;
 	std::string			getUsers() const;

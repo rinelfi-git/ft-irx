@@ -10,6 +10,7 @@ SRCs = \
 	Authenticated.cpp \
 	Channel.cpp \
 	IRCServer.cpp \
+	Message.cpp\
 	Mode.cpp \
 	Pending.cpp \
 	Response.cpp \

@@ -3,9 +3,9 @@
 #include "User.hpp"
 
 Message::Message(const User& sender, const std::string& content):
-	_sender(sender),
 	_content(content),
-	_to()
+	_to(),
+	_sender(sender)
 {}
 
 Message::~Message()
@@ -18,4 +18,6 @@ const Message&	Message::to(const std::string& set)
 }
 
 std::string	Message::toString(void) const
-{}
+{
+	return("");
+}

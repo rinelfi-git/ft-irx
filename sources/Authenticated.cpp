@@ -2,11 +2,13 @@
 #include "ASocketClient.hpp"
 #include "Pending.hpp"
 #include "User.hpp"
+#include "Message.hpp"
 #include "IRCServer.hpp"
 #include "Channel.hpp"
 #include "Response.hpp"
 #include <sstream>
 #include <string>
+#include <stdexcept>
 
 Authenticated::Authenticated(int fd):
 	ASocketClient(fd),
@@ -77,6 +79,14 @@ void	Authenticated::_parseMode(const std::string& arg)
 					hasNextParams = !builder.eof();
 					builder >> args;
 				}
+				else if (modes.compare("+i") == 0)
+				{
+					channel->mode().inviteOnly(true);
+				}
+				else if (modes.compare("-i") == 0)
+				{
+					channel->mode().inviteOnly(false);
+				}
 				else
 					return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 			}
@@ -86,7 +96,14 @@ void	Authenticated::_parseMode(const std::string& arg)
 
 void	Authenticated::_parsePrivMsg(const std::string& arg)
 {
-	(void)arg;
+
+	std::stringstream ss(arg);
+	std::string send_to, content;
+	ss >> send_to;
+	getline(ss, content);
+	content = content.substr(2);
+	Message message(*(user()), content);
+	message.to(send_to);
 }
 
 void	Authenticated::_parsePing(const std::string& arg)
