@@ -210,10 +210,24 @@ void	Authenticated::_kMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_oMode(const std::string& name, char action, const std::string& user)
 {
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+
 	if (action == '+')
-		std::cout << "invite operator " << user << " in " << name << std::endl;
+	{
+		channel->addOperator(*_user, user);
+	}
 	else
-		std::cout << "remove operator " << user << " from " << name << std::endl;
+		channel->removeOperator(*_user, user);
 }
 
 void	Authenticated::_lMode(const std::string& name, char action, const std::string& limit)
