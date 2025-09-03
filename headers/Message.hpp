@@ -10,9 +10,10 @@ private:
 	std::string	_to;
 	User		_sender;
 public:
-	Message(const User& sender, const std::string& content);
+	Message(const User& sender, const std::string& content, const std::string& to);
 	~Message();
 	const Message&	to(const std::string& set);
+
 	std::string		toString(void) const;
 };
 #endif

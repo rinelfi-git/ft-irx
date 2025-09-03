@@ -2,9 +2,9 @@
 #include "Message.hpp"
 #include "User.hpp"
 
-Message::Message(const User& sender, const std::string& content):
+Message::Message(const User& sender, const std::string& content , const std::string& to):
 	_content(content),
-	_to(),
+	_to(to),
 	_sender(sender)
 {}
 
