@@ -232,14 +232,56 @@ void	Authenticated::_oMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_lMode(const std::string& name, char action, const std::string& limit)
 {
-	(void)action;
-	std::cout << "set limit in " << name << " to " << limit << std::endl;
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+
+	if (action == '+')
+	{
+		if (limit.empty())
+        {
+            send("461 " + _user->info().nick() + " MODE :Not enough parameters");
+            return;
+        }
+		int limitValue = 0;
+        std::stringstream ss(limit);
+        if (!(ss >> limitValue) || limitValue <= 0)
+        {
+            send("696 " + _user->info().nick() + " " + name + " l :Invalid limit");
+            return;
+        }
+		channel->mode().memberLimit(limitValue);
+		channel->broadcast(":" + _user->networkId() + " MODE " + name + " +l " + limit);
+	}
+	
 }
 
 void	Authenticated::_lMode(const std::string& name, char action)
 {
-	(void)action;
-	std::cout << "delete limit in " << name << std::endl;
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+	if (action == '-')
+	{
+		channel->mode().memberLimit(0);
+		channel->broadcast(":" + _user->networkId() + " MODE " + name + " -l");
+	}
 }
 
 void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
