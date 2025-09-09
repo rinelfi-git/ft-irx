@@ -22,7 +22,7 @@ Channel::Channel(const std::string& name, User* first):
 
 void	Channel::message(const Message& msg) const
 {
-	(void)msg;
+	broadcast(msg.toString());
 }
 
 void	Channel::invite(const User& host, const User& guest)

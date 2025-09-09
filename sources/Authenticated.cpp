@@ -2,6 +2,7 @@
 #include "ASocketClient.hpp"
 #include "Pending.hpp"
 #include "User.hpp"
+#include "utils.hpp"
 #include "Message.hpp"
 #include "IRCServer.hpp"
 #include "Channel.hpp"
@@ -88,17 +89,104 @@ void	Authenticated::_parseMode(const std::string& arg)
 	}
 }
 
-void	Authenticated::_parsePrivMsg(const std::string& arg)
+/* void Authenticated::_parsePrivMsg(const std::string& arg)
 {
-	std::cout << "mini stere " << arg << std::endl;
-	std::stringstream ss(arg);
-	std::string send_to, content;
-	ss >> send_to;
-	getline(ss, content);
-	content = content.substr(2);
-	Message message(*(user()), content, send_to);
+    std::stringstream ss(arg);
+    std::string send_to, content;
+    
+    ss >> send_to;
+    getline(ss, content);
+    if (!content.empty() && content[0] == ' ')
+        content = content.substr(1);
+    if (!content.empty() && content[0] == ':')
+        content = content.substr(1);
+    if (send_to.empty())
+    {
+        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
+        return;
+    }
+    if (content.empty())
+    {
+        send("412 " + _user->info().nick() + " :No text to send");
+        return;
+    }
+    if (!send_to.empty() && send_to[0] == '#')
+    {
+        Channel *channel = IRCServer::getInstance().channel(send_to);
+        if (!channel)
+        {
+            send("403 " + _user->info().nick() + " " + send_to + " :No such channel");
+            return;
+        }
+        if (!channel->isMember(*_user))
+        {
+            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
+            return;
+        }
+        channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+    else
+    {
+        User* target = IRCServer::getInstance().user(send_to);
+        if (!target)
+        {
+            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
+            return;
+        }
+        target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
 }
+ */
 
+ void Authenticated::_parsePrivMsg(const std::string& arg)
+{
+    std::stringstream ss(arg);
+    std::string send_to, content;
+    
+    ss >> send_to;
+    getline(ss, content);
+    if (!content.empty() && content[0] == ' ')
+        content = content.substr(1);
+    if (!content.empty() && content[0] == ':')
+        content = content.substr(1);
+    
+    if (send_to.empty())
+    {
+        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
+        return;
+    }
+    if (content.empty())
+    {
+        send("412 " + _user->info().nick() + " :No text to send");
+        return;
+    }
+    
+    if (!send_to.empty() && send_to[0] == '#')
+    {
+        Channel *channel = IRCServer::getInstance().channel(send_to);
+        if (!channel)
+        {
+            send("403 " + _user->info().nick() + " " + send_to + " :No such channel");
+            return;
+        }
+        if (!channel->isMember(*_user))
+        {
+            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
+            return;
+        }
+        channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+    else
+    {
+        User* target = IRCServer::getInstance().user(strToLower(send_to));
+        if (!target)
+        {
+            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
+            return;
+        }
+        target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+}
 void	Authenticated::_parsePing(const std::string& arg)
 {
 	send("PONG " + arg);
