@@ -2,6 +2,7 @@
 #include "ASocketClient.hpp"
 #include "Pending.hpp"
 #include "User.hpp"
+#include "utils.hpp"
 #include "Message.hpp"
 #include "IRCServer.hpp"
 #include "Channel.hpp"
@@ -36,17 +37,22 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withoutParameter["-l"] = &Authenticated::_lMode;
 	withoutParameter["-t"] = &Authenticated::_tMode;
 	withoutParameter["+t"] = &Authenticated::_tMode;
+	withoutParameter["+i"] = &Authenticated::_iMode;
+	withoutParameter["-i"] = &Authenticated::_iMode; 
+
 	withParameter["-k"] = &Authenticated::_kMode;
 	withParameter["+k"] = &Authenticated::_kMode;
 	withParameter["-o"] = &Authenticated::_oMode;
 	withParameter["+o"] = &Authenticated::_oMode;
-	withParameter["-i"] = &Authenticated::_iMode;
-	withParameter["+i"] = &Authenticated::_iMode;
+	//withParameter["-i"] = &Authenticated::_iMode;
+	//withParameter["+i"] = &Authenticated::_iMode;
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
 	if (User::isNickName(name))
 		return ;
+	if (!channel)
+		return;
 	if (Channel::isChannelName(name) && !channel)
 		return	Response(*this).errNoSuchChannel(_user->info().nick(), name);
 	if (modes.empty())
@@ -79,14 +85,6 @@ void	Authenticated::_parseMode(const std::string& arg)
 					hasNextParams = !builder.eof();
 					builder >> args;
 				}
-				else if (modes.compare("+i") == 0)
-				{
-					channel->mode().inviteOnly(true);
-				}
-				else if (modes.compare("-i") == 0)
-				{
-					channel->mode().inviteOnly(false);
-				}
 				else
 					return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 			}
@@ -94,18 +92,104 @@ void	Authenticated::_parseMode(const std::string& arg)
 	}
 }
 
-void	Authenticated::_parsePrivMsg(const std::string& arg)
+/* void Authenticated::_parsePrivMsg(const std::string& arg)
 {
-
-	std::stringstream ss(arg);
-	std::string send_to, content;
-	ss >> send_to;
-	getline(ss, content);
-	content = content.substr(2);
-	Message message(*(user()), content);
-	message.to(send_to);
+    std::stringstream ss(arg);
+    std::string send_to, content;
+    
+    ss >> send_to;
+    getline(ss, content);
+    if (!content.empty() && content[0] == ' ')
+        content = content.substr(1);
+    if (!content.empty() && content[0] == ':')
+        content = content.substr(1);
+    if (send_to.empty())
+    {
+        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
+        return;
+    }
+    if (content.empty())
+    {
+        send("412 " + _user->info().nick() + " :No text to send");
+        return;
+    }
+    if (!send_to.empty() && send_to[0] == '#')
+    {
+        Channel *channel = IRCServer::getInstance().channel(send_to);
+        if (!channel)
+        {
+            send("403 " + _user->info().nick() + " " + send_to + " :No such channel");
+            return;
+        }
+        if (!channel->isMember(*_user))
+        {
+            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
+            return;
+        }
+        channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+    else
+    {
+        User* target = IRCServer::getInstance().user(send_to);
+        if (!target)
+        {
+            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
+            return;
+        }
+        target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
 }
+ */
 
+ void Authenticated::_parsePrivMsg(const std::string& arg)
+{
+    std::stringstream ss(arg);
+    std::string send_to, content;
+    
+    ss >> send_to;
+    getline(ss, content);
+    if (!content.empty() && content[0] == ' ')
+        content = content.substr(1);
+    if (!content.empty() && content[0] == ':')
+        content = content.substr(1);
+    
+    if (send_to.empty())
+    {
+        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
+        return;
+    }
+    if (content.empty())
+    {
+        send("412 " + _user->info().nick() + " :No text to send");
+        return;
+    }
+    
+    if (!send_to.empty() && send_to[0] == '#')
+    {
+        Channel *channel = IRCServer::getInstance().channel(send_to);
+        if (!channel)
+        {
+            send("403 " + _user->info().nick() + " " + send_to + " :No such channel");
+            return;
+        }
+        if (!channel->isMember(*_user))
+        {
+            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
+            return;
+        }
+        channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+    else
+    {
+        User* target = IRCServer::getInstance().user(strToLower(send_to));
+        if (!target)
+        {
+            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
+            return;
+        }
+        target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
+    }
+}
 void	Authenticated::_parsePing(const std::string& arg)
 {
 	send("PONG " + arg);
@@ -168,13 +252,31 @@ void	Authenticated::_parseQuit(const std::string& arg)
 	IRCServer::getInstance().quit(*_user, arg);
 }
 
-void	Authenticated::_iMode(const std::string& name, char action, const std::string& user)
+void Authenticated::_iMode(const std::string& name, char action)
 {
-	if (action == '+')
-		std::cout << "Invite " << user << " in " << name << std::endl;
-	else
-		std::cout << "Remove invite " << user << " in " << name << std::endl;
+    Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+    
+    if (action == '+')
+	{
+        channel->mode().inviteOnly(true);
+        channel->broadcast(":" + _user->networkId() + " MODE " + name + " +i");
+    } else if (action == '-')
+	{
+        channel->mode().inviteOnly(false);
+        channel->broadcast(":" + _user->networkId() + " MODE " + name + " -i");
+    }
 }
+
 
 void	Authenticated::_tMode(const std::string& name, char action)
 {
@@ -199,22 +301,78 @@ void	Authenticated::_kMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_oMode(const std::string& name, char action, const std::string& user)
 {
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+
 	if (action == '+')
-		std::cout << "invite operator " << user << " in " << name << std::endl;
+	{
+		channel->addOperator(*_user, user);
+	}
 	else
-		std::cout << "remove operator " << user << " from " << name << std::endl;
+		channel->removeOperator(*_user, user);
 }
 
 void	Authenticated::_lMode(const std::string& name, char action, const std::string& limit)
 {
-	(void)action;
-	std::cout << "set limit in " << name << " to " << limit << std::endl;
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+
+	if (action == '+')
+	{
+		if (limit.empty())
+        {
+            send("461 " + _user->info().nick() + " MODE :Not enough parameters");
+            return;
+        }
+		int limitValue = 0;
+        std::stringstream ss(limit);
+        if (!(ss >> limitValue) || limitValue <= 0)
+        {
+            send("696 " + _user->info().nick() + " " + name + " l :Invalid limit");
+            return;
+        }
+		channel->mode().memberLimit(limitValue);
+		channel->broadcast(":" + _user->networkId() + " MODE " + name + " +l " + limit);
+	}
+	
 }
 
 void	Authenticated::_lMode(const std::string& name, char action)
 {
-	(void)action;
-	std::cout << "delete limit in " << name << std::endl;
+	 Channel* channel = IRCServer::getInstance().channel(name);
+    if (!channel)
+	{
+        send("403 " + _user->info().nick() + " " + name + " :No such channel");
+        return;
+    }
+    if (!channel->isOperator(*_user))
+	{
+        send("482 " + _user->info().nick() + " " + name + " :You're not channel operator");
+        return;
+    }
+	if (action == '-')
+	{
+		channel->mode().memberLimit(0);
+		channel->broadcast(":" + _user->networkId() + " MODE " + name + " -l");
+	}
 }
 
 void	Authenticated::parse(const std::map<std::string, std::string>& cmds)

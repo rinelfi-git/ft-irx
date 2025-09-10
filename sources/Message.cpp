@@ -1,10 +1,11 @@
 #include <string>
 #include "Message.hpp"
 #include "User.hpp"
+#include <sstream>
 
-Message::Message(const User& sender, const std::string& content):
+Message::Message(const User& sender, const std::string& content , const std::string& to):
 	_content(content),
-	_to(),
+	_to(to),
 	_sender(sender)
 {}
 
@@ -19,5 +20,9 @@ const Message&	Message::to(const std::string& set)
 
 std::string	Message::toString(void) const
 {
-	return("");
+	std::ostringstream oss;
+    oss << ":" << _sender.networkId()
+        << " PRIVMSG " << _to
+        << " :" << _content;
+    return oss.str();
 }
