@@ -3,6 +3,7 @@
 #include "User.hpp"
 #include "Message.hpp"
 #include "Authenticated.hpp"
+#include "Response.hpp"
 #include <string>
 #include <map>
 #include <sstream>
@@ -35,8 +36,7 @@ void	Channel::setTopic(const User& setter, const std::string& set)
 {
 	if (_mode.isTopicRestricted() && !isOperator(setter))
 	{
-		setter.socket().send("482 " + setter.info().nick() + " " + _name + " :You're not channel operator");
-		return ;
+		return Response(setter.socket()).errNotOperator(setter.info().nick(), _name);
 	}
 	_topic = set;
 	broadcast("332 " + setter.info().nick() + " " + _name + " :" + _topic);
