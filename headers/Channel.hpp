@@ -30,6 +30,7 @@ public:
 	bool	isInvited(const User& user) const;
 	bool	isInvited(const std::string& id) const;
 	void	join(User* user);
+	bool	isEmpty(void);
 	const std::string&	name(void) const;
 	Mode&				mode(void);
 	std::string			modeResume(void) const;
@@ -39,6 +40,7 @@ public:
 	void				setPassword(const User& setter, const std::string& password);
 	void				setTopicMode(const User& setter, bool operatorOnly);
 	void				quit(const User& user, const std::string& msg);
+	void				part(const User& user, const std::string& msg);
 	static bool			isChannelName(const std::string& str);
 	void				broadcast(const std::string& msg) const;
 	void				kick(const User& op, const User& member, const std::string& message);
