@@ -121,6 +121,10 @@ std::string Channel::getUsers() const
 	return (out.substr(1));
 }
 
+bool	Channel::isEmpty(void)
+{
+	return _members.empty();
+}
 std::string	Channel::modeResume(void) const
 {
 	std::string	modes;
@@ -238,6 +242,15 @@ void	Channel::quit(const User& user, const std::string& msg)
 	_operators.erase(id);
 	_inviteds.erase(id);
 	broadcast(":" + user.networkId() + " QUIT " + msg);
+}
+
+void	Channel::part(const User& user, const std::string& msg)
+{
+	std::string	id(user.id());
+	broadcast(":" + user.networkId() + " PART " + msg);
+	_members.erase(id);
+	_operators.erase(id);
+	_inviteds.erase(id);
 }
 
 bool	Channel::isChannelName(const std::string& str)

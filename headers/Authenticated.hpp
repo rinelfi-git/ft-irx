@@ -20,9 +20,9 @@ private:
 	void	_parseTopic(const std::string& arg);
 	void	_parseQuit(const std::string& arg);
 	void	_parseKick(const std::string& arg);
+	void	_parsePart(const std::string& arg);
 	void	_tMode(const std::string& name, char action);
 	void	_iMode(const std::string& name, char action);
-	//void	_iMode(const std::string& name, char action, const std::string& user);
 	void	_kMode(const std::string& name, char action, const std::string& password);
 	void	_oMode(const std::string& name, char action, const std::string& user);
 	void	_lMode(const std::string& name, char action, const std::string& limit);
