@@ -310,7 +310,7 @@ void Channel::removeOperator(const User& op, const std::string& user)
     if (!isMember(user))
 		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), user, _name);
     if (!isOperator(user))
-        return ;
+		return;
 	_operators.erase(user);
 	std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " -o " + user;
 	broadcast(modeMsg);
