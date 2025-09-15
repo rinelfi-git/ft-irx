@@ -44,8 +44,6 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+k"] = &Authenticated::_kMode;
 	withParameter["-o"] = &Authenticated::_oMode;
 	withParameter["+o"] = &Authenticated::_oMode;
-	//withParameter["-i"] = &Authenticated::_iMode;
-	//withParameter["+i"] = &Authenticated::_iMode;
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
@@ -161,6 +159,56 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	channel->setTopic(*_user, topic.substr(topic.find(':') + 1));
 }
 
+void    Authenticated::_parsePart(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    std::string channels;
+    std::string reason;
+    
+    if (!std::getline(iss, channels, ' ') || channels.empty())
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "PART");
+    std::string temp;
+    if (std::getline(iss, temp))
+    {
+        if (!temp.empty() && temp[0] == ':')
+            reason = " " + temp;
+        else
+            reason = " :" + temp;
+    }
+    if (reason.empty())
+        reason = " : good bye!";
+    std::istringstream channelStream(channels);
+    std::string channelName;
+    
+    while (std::getline(channelStream, channelName, ','))
+    {
+        size_t start = channelName.find_first_not_of(" \t");
+        size_t end = channelName.find_last_not_of(" \t");
+        
+        if (start == std::string::npos)
+            continue;
+        channelName = channelName.substr(start, end - start + 1);
+        if (!Channel::isChannelName(channelName))
+        {
+			Response(*this).errNoSuchChannel(_user->info().nick(), channelName);
+            continue;
+        }
+        Channel* channel = IRCServer::getInstance().channel(channelName);
+        if (!channel)
+        {
+            Response(*this).errNoSuchChannel(_user->info().nick(), channelName);
+            continue;
+        }
+        if (!channel->isMember(*_user))
+        {
+            Response(*this).errNotOnThatChannel(_user->info().nick(), channelName);
+            continue;
+        }
+        std::string msg = channelName + reason;
+        channel->part(*_user, msg);
+    }
+} 
+
 void	Authenticated::_parseKick(const std::string& arg)
 {
 	std::stringstream ss(arg);
@@ -252,7 +300,6 @@ void	Authenticated::_lMode(const std::string& name, char action, const std::stri
 		channel->mode().memberLimit(limitValue);
 		channel->broadcast(":" + _user->networkId() + " MODE " + name + " +l " + limit);
 	}
-	
 }
 
 void	Authenticated::_lMode(const std::string& name, char action)
@@ -281,6 +328,7 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	actions["topic"] = &Authenticated::_parseTopic;
 	actions["kick"] = &Authenticated::_parseKick;
 	actions["quit"] = &Authenticated::_parseQuit;
+	actions["part"] = &Authenticated::_parsePart;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())
