@@ -34,7 +34,7 @@ public:
 	Authenticated(const Pending& pending);
 	~Authenticated();
 	User*	user(void) const;
-	void	user(User* user);
+	void	user(User* set);
 };
 
 #endif

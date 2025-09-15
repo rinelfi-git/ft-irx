@@ -46,5 +46,6 @@ public:
 	void				kick(const User& op, const User& member, const std::string& message);
 	void 				addOperator(const User& op,  const std::string& user);
 	void				removeOperator(const User& op, const std::string& user);
+	void				setInviteOnly(const std::string& user, bool set);
 };
 #endif
