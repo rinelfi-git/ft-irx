@@ -9,6 +9,7 @@
 #include "Response.hpp"
 #include <sstream>
 #include <string>
+#include <algorithm>
 #include <stdexcept>
 
 Authenticated::Authenticated(int fd):
@@ -44,8 +45,6 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+k"] = &Authenticated::_kMode;
 	withParameter["-o"] = &Authenticated::_oMode;
 	withParameter["+o"] = &Authenticated::_oMode;
-	//withParameter["-i"] = &Authenticated::_iMode;
-	//withParameter["+i"] = &Authenticated::_iMode;
 	withParameter["+l"] = &Authenticated::_lMode;
 
 	Channel*	channel(IRCServer::getInstance().channel(name));
@@ -91,55 +90,6 @@ void	Authenticated::_parseMode(const std::string& arg)
 		}
 	}
 }
-
-/* void Authenticated::_parsePrivMsg(const std::string& arg)
-{
-    std::stringstream ss(arg);
-    std::string send_to, content;
-    
-    ss >> send_to;
-    getline(ss, content);
-    if (!content.empty() && content[0] == ' ')
-        content = content.substr(1);
-    if (!content.empty() && content[0] == ':')
-        content = content.substr(1);
-    if (send_to.empty())
-    {
-        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
-        return;
-    }
-    if (content.empty())
-    {
-        send("412 " + _user->info().nick() + " :No text to send");
-        return;
-    }
-    if (!send_to.empty() && send_to[0] == '#')
-    {
-        Channel *channel = IRCServer::getInstance().channel(send_to);
-        if (!channel)
-        {
-            send("403 " + _user->info().nick() + " " + send_to + " :No such channel");
-            return;
-        }
-        if (!channel->isMember(*_user))
-        {
-            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
-            return;
-        }
-        channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
-    }
-    else
-    {
-        User* target = IRCServer::getInstance().user(send_to);
-        if (!target)
-        {
-            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
-            return;
-        }
-        target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
-    }
-}
- */
 
  void Authenticated::_parsePrivMsg(const std::string& arg)
 {
@@ -227,6 +177,59 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	channel = IRCServer::getInstance().channel(name);
 	channel->setTopic(*_user, topic.substr(topic.find(':') + 1));
 }
+
+void    Authenticated::_parsePart(const std::string& arg)
+{
+    std::istringstream iss(arg);
+    std::string channels;
+    std::string reason;
+    
+    if (!std::getline(iss, channels, ' ') || channels.empty())
+    {
+        send("461 " + _user->info().nick() + " PART :Not enough parameters");
+        return;
+    }
+    std::string temp;
+    if (std::getline(iss, temp))
+    {
+        if (!temp.empty() && temp[0] == ':')
+            reason = " " + temp;
+        else
+            reason = " :" + temp;
+    }
+    if (reason.empty())
+        reason = " : good bye!";
+    std::istringstream channelStream(channels);
+    std::string channelName;
+    
+    while (std::getline(channelStream, channelName, ','))
+    {
+        size_t start = channelName.find_first_not_of(" \t");
+        size_t end = channelName.find_last_not_of(" \t");
+        
+        if (start == std::string::npos)
+            continue;
+        channelName = channelName.substr(start, end - start + 1);
+        if (!Channel::isChannelName(channelName))
+        {
+            send("403 " + _user->info().nick() + " " + channelName + " :No such channel");
+            continue;
+        }
+        Channel* channel = IRCServer::getInstance().channel(channelName);
+        if (!channel)
+        {
+            send("403 " + _user->info().nick() + " " + channelName + " :No such channel");
+            continue;
+        }
+        if (!channel->isMember(*_user))
+        {
+            send("442 " + _user->info().nick() + " " + channelName + " :You're not on that channel");
+            continue;
+        }
+        std::string msg = channelName + reason;
+        channel->part(*_user, msg);
+    }
+} 
 
 void	Authenticated::_parseKick(const std::string& arg)
 {
@@ -387,6 +390,7 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	actions["topic"] = &Authenticated::_parseTopic;
 	actions["kick"] = &Authenticated::_parseKick;
 	actions["quit"] = &Authenticated::_parseQuit;
+	actions["part"] = &Authenticated::_parsePart;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())

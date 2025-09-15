@@ -12,6 +12,7 @@ int	main(int argc, char** argv)
 		SocketServer	socket(validator.port());
 		IRCServer		server(validator.password());
 		server.bind(socket);
+		std::cout << "Server listening on port " << argv[1] << std::endl;
 		socket.start();
 	}
 	catch (const std::exception& e)
