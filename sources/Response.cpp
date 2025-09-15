@@ -47,6 +47,21 @@ void	Response::errNeedMoreParams(const std::string& user, const std::string& com
 	_client->send("461 " + user + " " + command + " :Not enough parameters");
 }
 
+void	Response::errCannotJoinLimited(const std::string& user, const std::string& channel) const
+{
+	_client->send("471 " + user + " " + channel + " :Cannot join channel (+l)");
+}
+
+void	Response::errCannotJoinInvite(const std::string& user, const std::string& channel) const
+{
+	_client->send("473 " + user + " " + channel + " :Cannot join channel (+i)");
+}
+
+void	Response::errCannotJoinPassword(const std::string& user, const std::string& channel) const
+{
+	_client->send("475 " + user + " " + channel + " :Cannot join channel (+k)");
+}
+
 void	Response::errNotOperator(const std::string& user, const std::string& channel) const
 {
 	_client->send("482 " + user + " " + channel + " :You're not channel operator");

@@ -20,5 +20,8 @@ public:
 	void	errEmptyRecipient(const std::string& user) const;
 	void	errEmptyContent(const std::string& user) const;
 	void	errCannotSendToChannel(const std::string& user, const std::string& channel) const;
+	void	errCannotJoinLimited(const std::string& user, const std::string& channel) const;
+	void	errCannotJoinInvite(const std::string& user, const std::string& channel) const;
+	void	errCannotJoinPassword(const std::string& user, const std::string& channel) const;
 };
 #endif

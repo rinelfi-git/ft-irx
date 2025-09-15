@@ -194,17 +194,17 @@ bool	Channel::auth(User* user, const std::string& password)
 		return (true);
 	if (_mode.isInviteOnly() && !isInvited(*user))
 	{
-		user->socket().send("473 " + user->info().nick() + " " + _name + " :Cannot join channel (+i)");
+		Response(user->socket()).errCannotJoinInvite(user->info().nick(), _name);
 		return (false);
 	}
 	if (!_password.empty() && _password != password)
 	{
-		user->socket().send("475 " + user->info().nick() + " " + _name + " :Cannot join channel (+k)");
+		Response(user->socket()).errCannotJoinPassword(user->info().nick(), _name);
 		return (false);
 	}
 	if (_mode.memberLimit() > 0 && _members.size() >= _mode.memberLimit())
 	{
-		user->socket().send("471 " + user->info().nick() + " " + _name + " :Cannot join channel (+l)");
+		Response(user->socket()).errCannotJoinLimited(user->info().nick(), _name);
 		return (false);
 	}
 	return (true);
