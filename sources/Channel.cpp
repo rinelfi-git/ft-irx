@@ -308,19 +308,12 @@ void Channel::removeOperator(const User& op, const std::string& user)
     if (!isOperator(op))
 		return Response(op.socket()).errNotOperator(op.info().nick(), _name);
     if (!isMember(user))
-    {
-        op.socket().send("441 " + op.info().nick() + " " + _name +" " + user + " :They aren't on that channel");
-        return;
-    }
+		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), user, _name);
     if (!isOperator(user))
-        return;
-    std::map<std::string, User*>::iterator it = _operators.find(user);
-    if (it != _operators.end())
-    {
-        _operators.erase(it);
-        std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " -o " + user;
-        broadcast(modeMsg);
-    }
+        return ;
+	_operators.erase(user);
+	std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " -o " + user;
+	broadcast(modeMsg);
 }
 
 void	Channel::setInviteOnly(const std::string& user, bool set)

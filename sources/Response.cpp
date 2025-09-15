@@ -32,6 +32,11 @@ void	Response::errCannotSendToChannel(const std::string& user, const std::string
 	_client->send("404 " + user + " " + channel + " :Cannot send to channel");
 }
 
+void	Response::errNotOnThatChannel(const std::string& op, const std::string& user, const std::string& channel) const
+{
+	_client->send("441 " + op + " " + channel + " " + user + " :They aren't on that channel");
+}
+
 void	Response::errEmptyRecipient(const std::string& user) const
 {
 	_client->send("411 " + user + " :No recipient given (PRIVMSG)");

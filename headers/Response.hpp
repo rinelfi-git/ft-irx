@@ -23,5 +23,6 @@ public:
 	void	errCannotJoinLimited(const std::string& user, const std::string& channel) const;
 	void	errCannotJoinInvite(const std::string& user, const std::string& channel) const;
 	void	errCannotJoinPassword(const std::string& user, const std::string& channel) const;
+	void	errNotOnThatChannel(const std::string& op, const std::string& user, const std::string& channel) const;
 };
 #endif
