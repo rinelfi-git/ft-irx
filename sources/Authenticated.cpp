@@ -99,42 +99,27 @@ void Authenticated::_parsePrivMsg(const std::string& arg)
     
     ss >> send_to;
     getline(ss, content);
-    if (!content.empty() && content[0] == ' ')
-        content = content.substr(1);
-    if (!content.empty() && content[0] == ':')
-        content = content.substr(1);
+    content = content.substr(1);
     
     if (send_to.empty())
-    {
-        send("411 " + _user->info().nick() + " :No recipient given (PRIVMSG)");
-        return;
-    }
+		return Response(*this).errEmptyRecipient(_user->info().nick());
     if (content.empty())
-    {
-        send("412 " + _user->info().nick() + " :No text to send");
-        return;
-    }
+		return Response(*this).errEmptyContent(_user->info().nick());
     
-    if (!send_to.empty() && send_to[0] == '#')
+    if (Channel::isChannelName(send_to))
     {
         Channel *channel = IRCServer::getInstance().channel(send_to);
         if (!channel)
 			return Response(*this).errNoSuchChannel(_user->info().nick(), send_to);
         if (!channel->isMember(*_user))
-        {
-            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
-            return;
-        }
+			return Response(*this).errCannotSendToChannel(_user->info().nick(), send_to);
         channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
     }
     else
     {
         User* target = IRCServer::getInstance().user(strToLower(send_to));
         if (!target)
-        {
-            send("401 " + _user->info().nick() + " " + send_to + " :No such nick/channel");
-            return;
-        }
+			return Response(*this).errNoSuchNick(_user->info().nick(), send_to);
         target->socket().send(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
     }
 }
@@ -259,17 +244,11 @@ void	Authenticated::_lMode(const std::string& name, char action, const std::stri
 	if (action == '+')
 	{
 		if (limit.empty())
-        {
-            send("461 " + _user->info().nick() + " MODE :Not enough parameters");
-            return;
-        }
+			return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 		int limitValue = 0;
         std::stringstream ss(limit);
         if (!(ss >> limitValue) || limitValue <= 0)
-        {
-            send("696 " + _user->info().nick() + " " + name + " l :Invalid limit");
-            return;
-        }
+			return Response(*this).errInvalidLimit(_user->info().nick(), "MODE");
 		channel->mode().memberLimit(limitValue);
 		channel->broadcast(":" + _user->networkId() + " MODE " + name + " +l " + limit);
 	}

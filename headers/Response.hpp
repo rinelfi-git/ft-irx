@@ -16,5 +16,9 @@ public:
 	void	errNeedMoreParams(const std::string& user, const std::string& command) const;
 	void	errNoSuchNick(const std::string& user, const std::string& nick) const;
 	void	errNotOperator(const std::string& user, const std::string& channel) const;
+	void	errInvalidLimit(const std::string& user, const std::string& channel) const;
+	void	errEmptyRecipient(const std::string& user) const;
+	void	errEmptyContent(const std::string& user) const;
+	void	errCannotSendToChannel(const std::string& user, const std::string& channel) const;
 };
 #endif
