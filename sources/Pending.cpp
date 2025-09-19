@@ -4,15 +4,18 @@
 #include "IRCServer.hpp"
 #include "utils.hpp"
 #include "User.hpp"
+#include "Response.hpp"
 #include <string>
 #include <map>
 #include <sstream>
+#include <vector>
 
 Pending::Pending(int fd):
 	ASocketClient(fd),
 	_id(),
 	_userInfo(),
-	_password()
+	_password(),
+	_currentStep(0)
 {}
 
 Pending::~Pending()
@@ -22,41 +25,45 @@ bool	Pending::auth(void)
 {
 	if (!_userInfo.complete())
 		return (false);
-	if (User::isNickName(_userInfo.nick()) == false)
-	{
-		send("432 * " + _userInfo.nick() + " :Erroneous nickname");
-		return (false);
-	}
-	return IRCServer::getInstance().auth(*this);
+	bool	auth(IRCServer::getInstance().auth(*this));
+	if (!auth)
+		_currentStep = 0;
+	return auth;
 }
 
 void	Pending::parse(const std::map<std::string, std::string>& cmds)
 {
-	std::map<std::string, void (Pending::*)(const std::string&)>	actions;
-	actions["user"] = &Pending::_parseUser;
-	actions["nick"] = &Pending::_parseNick;
-	actions["cap"] = &Pending::_parseCap;
-	actions["pass"] = &Pending::_parsePass;
+	std::vector<std::pair<std::string, void (Pending::*)(const std::string&)> > actions;
+	actions.push_back(std::make_pair("cap", &Pending::_parseCap));
+	actions.push_back(std::make_pair("pass", &Pending::_parsePass));
+	actions.push_back(std::make_pair("nick", &Pending::_parseNick));
+	actions.push_back(std::make_pair("user", &Pending::_parseUser));
 	
-	std::map<std::string, void (Pending::*)(const std::string&)>::iterator	actionPtr(actions.begin());
-	while (actionPtr != actions.end())
+	for (size_t	i(0); i < actions.size(); i++)
 	{
-		std::map<std::string, std::string>::const_iterator	cmdPtr(cmds.find(actionPtr->first));
+		std::map<std::string, std::string>::const_iterator	cmdPtr(cmds.find(actions[i].first));
 		if (cmdPtr != cmds.end())
-			(this->*actions.at(cmdPtr->first))(cmdPtr->second);
-		actionPtr++;
+			(this->*actions[i].second)(cmdPtr->second);
 	}
 }
 
 void	Pending::_parseNick(const std::string& in)
 {
+	if (_currentStep == 0)
+		return Response(*this).errPasswdMismatch();
+	if (!User::isNickName(in))
+		return Response(*this).errErrOneusNickname(in);
+	if (IRCServer::getInstance().user(strToLower(in)))
+		return Response(*this).errNicknameInUse(in);
 	_userInfo.nick(in);
 	_id = strToLower(in);
+	_currentStep++;
 }
 
 void	Pending::_parsePass(const std::string& in)
 {
 	_password = in;
+	_currentStep++;
 }
 
 void	Pending::_parseUser(const std::string& in)
@@ -68,16 +75,21 @@ void	Pending::_parseUser(const std::string& in)
 	std::string			realname;
 	char				ddot;
 
+	if (_currentStep <= 1)
+		return Response(*this).errPasswdMismatch();
 	builder >> uname;
 	builder >> host;
 	builder >> server;
 	builder >> ddot;
 	std::getline(builder, realname);
 
+	if (uname.empty() || host.empty() || server.empty() || realname.empty())
+		return Response(*this).errNeedMoreParams(_userInfo.nick(), "USER");
 	_userInfo.uname(uname)
 		.host(host)
 		.server(server)
 		.realname(realname);
+	_currentStep++;
 }
 
 void	Pending::_parseCap(const std::string& in)

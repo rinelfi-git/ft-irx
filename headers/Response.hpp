@@ -3,6 +3,7 @@
 # include <string>
 
 class	Channel;
+class	User;
 class	ASocketClient;
 class	Response
 {
@@ -25,5 +26,13 @@ public:
 	void	errCannotJoinPassword(const std::string& user, const std::string& channel) const;
 	void	errNotOnThatChannel(const std::string& op, const std::string& user, const std::string& channel) const;
 	void	errNotOnThatChannel(const std::string& user, const std::string& channel) const;
+	void	errPasswdMismatch(void) const;
+	void	errErrOneusNickname(const std::string& nick) const;
+	void	errNicknameInUse(const std::string& nick) const;
+	void	rplWelcome(const User& user) const;
+	void	rplYourHost(const std::string& nick) const;
+	void	rplCreated(const std::string& nick) const;
+	void	rplMyInfo(const std::string& nick) const;
+	void	errNoMOTD(const std::string& nick) const;
 };
 #endif
