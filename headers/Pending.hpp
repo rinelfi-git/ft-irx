@@ -4,6 +4,7 @@
 # include "UserInfo.hpp"
 # include <string>
 # include <map>
+# include <vector>
 
 class	Pending: public ASocketClient
 {
@@ -11,6 +12,7 @@ private:
 	std::string	_id;
 	UserInfo	_userInfo;
 	std::string	_password;
+	int		_currentStep;
 	void	_parseNick(const std::string& in);
 	void	_parsePass(const std::string& in);
 	void	_parseUser(const std::string& in);
