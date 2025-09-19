@@ -38,7 +38,7 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withoutParameter["-t"] = &Authenticated::_tMode;
 	withoutParameter["+t"] = &Authenticated::_tMode;
 	withoutParameter["+i"] = &Authenticated::_iMode;
-	withoutParameter["-i"] = &Authenticated::_iMode; 
+	withoutParameter["-i"] = &Authenticated::_iMode;
 
 	withParameter["-k"] = &Authenticated::_kMode;
 	withParameter["+k"] = &Authenticated::_kMode;
