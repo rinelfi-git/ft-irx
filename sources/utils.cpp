@@ -1,5 +1,8 @@
 #include <string>
 #include <cctype>
+#include <iostream>
+#include <vector>
+#include <sstream>
 
 std::string	strToLower(const std::string& str)
 {
@@ -44,4 +47,17 @@ bool	isUpper(char c)
 bool	isAlpha(char c)
 {
 	return (isLower(c) || isUpper(c));
+}
+
+std::vector<std::string>	ft_split(std::string str, char delimiteur)
+{
+	std::stringstream ss(str);
+	std::vector<std::string> result;
+	std::string item;
+	
+	while (getline(ss, item, delimiteur))
+	{
+		result.push_back(item);
+	}
+	return (result);
 }

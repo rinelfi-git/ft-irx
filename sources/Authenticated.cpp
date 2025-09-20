@@ -10,6 +10,10 @@
 #include <string>
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
+#include <vector>
+#include "utils.hpp"
+
 
 Authenticated::Authenticated(int fd):
 	ASocketClient(fd),
@@ -121,7 +125,7 @@ void	Authenticated::_parseMode(const std::string& arg)
         }
         if (!channel->isMember(*_user))
         {
-            send("404 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
+            send("442 " + _user->info().nick() + " " + send_to + " :Cannot send to channel");
             return;
         }
         channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
@@ -146,15 +150,30 @@ void	Authenticated::_parseJoin(const std::string& arg)
 {
 	std::stringstream	builder(arg);
 	std::string			name;
+	std::vector<std::string>	name_v;
 	std::string			password;
+	std::vector<std::string>	password_v;
+	size_t i = 0;
 
 	builder >> name;
 	builder >> password;
-	Channel *channel = IRCServer::getInstance().channel(name);
-	if (!channel)
-		IRCServer::getInstance().createChannel(name, _user);
-	else if (channel->auth(_user, password))
-		channel->join(_user);
+	name_v = ft_split(name, ',');
+	password_v = ft_split(password, ',');
+	while (i < name_v.size())
+	{
+		Channel *channel = IRCServer::getInstance().channel(name_v[i]);
+		if (!channel)
+		{
+			IRCServer::getInstance().createChannel(name_v[i], _user);
+			i++;
+			continue;
+		}
+		if (password_v[i] != "x")
+			password_v[i].erase(0, 1);
+		if (channel->auth(_user, password_v[i]))
+			channel->join(_user);
+		i++;
+	}
 }
 
 void	Authenticated::_parseInvite(const std::string& arg)
