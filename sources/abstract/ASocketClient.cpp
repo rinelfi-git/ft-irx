@@ -36,24 +36,40 @@ void	ASocketClient::input(const std::string& data)
 	while (!_buffer.empty())
 	{
 		size_t	space(_buffer.find(' '));
-		size_t	cr(_buffer.find('\r'));
-		size_t	lf(_buffer.find('\n'));
-		if (lf == std::string::npos)
+		size_t	carriageReturn(_buffer.find('\r'));
+		size_t	lineFeed(_buffer.find('\n'));
+		bool	hasCarriageReturn(carriageReturn != std::string::npos);
+		if (lineFeed == std::string::npos)
 			break;
+		// have no space
 		if (space == std::string::npos)
-			_buffer = _buffer.substr(lf + 1);
-		else if (space < lf)
+		{
+			size_t	length(lineFeed);
+			if (hasCarriageReturn)
+				length--;
+			std::string	index(_buffer.substr(0, length));
+			if (!index.empty())
+			{
+				cmds[index] = "";
+				std::cout << IN_COLOR << "(" << index << ") EMPTY PARAMETER" << std::endl << DEFAULT_COLOR;
+			}
+			_buffer = _buffer.substr(lineFeed + 1);
+		}
+		else if (space < lineFeed)
 		{
 			size_t offset = space + 1;
-			std::string	line(_buffer.substr(0, lf));
-			size_t		length(lf - offset);
-			if (cr != std::string::npos)
+			std::string	line(_buffer.substr(0, lineFeed));
+			size_t		length(lineFeed - offset);
+			if (hasCarriageReturn)
 				length--;
 			std::string index(strToLower(_buffer.substr(0, space)));
-			std::string value(_buffer.substr(offset, length));
-			_buffer = _buffer.substr(lf + 1);
-			cmds[index] = value;
-			std::cout << IN_COLOR << "(" << index << ")[" << value << "]" << std::endl << DEFAULT_COLOR;
+			if (!index.empty())
+			{
+				std::string value(_buffer.substr(offset, length));
+				cmds[index] = value;
+				std::cout << IN_COLOR << "(" << index << ")[" << value << "]" << std::endl << DEFAULT_COLOR;
+			}
+			_buffer = _buffer.substr(lineFeed + 1);
 		}
 	}
 	parse(cmds);

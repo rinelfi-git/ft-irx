@@ -7,6 +7,7 @@
 #include "Pending.hpp"
 #include "Authenticated.hpp"
 #include "utils.hpp"
+#include "Response.hpp"
 #include <string>
 #include <stdexcept>
 #include <iostream>
@@ -29,8 +30,8 @@ IRCServer::IRCServer(const std::string& password):
 
 IRCServer::~IRCServer()
 {
-	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.begin());
-	std::map<std::string, User*>::iterator	userPtr(_users.begin());
+	std::map<int, ASocketClient*>::iterator		socketClientPtr(_socketClients.begin());
+	std::map<std::string, User*>::iterator		userPtr(_users.begin());
 	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
 
 	while (channelPtr != _channels.end())
@@ -57,18 +58,18 @@ IRCServer&	IRCServer::getInstance(void)
 
 bool	IRCServer::auth(const Pending& pending)
 {
-	if (user(pending.id()))
-	{
-		pending.send("433 * " + pending.userInfo().nick() + " :Nickname is already in use");
-		return (false);
-	}
 	if (_password.empty() || pending.password() == _password)
 	{
-		User	created(_createUser(pending.userInfo(), pending));
-		created.socket().send("001 " + created.info().nick() + " :Welcome to the Internet Relay Network " + created.networkId());
+		User			created(_createUser(pending.userInfo(), pending));
+		Authenticated	socket(created.socket());
+		Response(socket).rplWelcome(created);
+		Response(socket).rplYourHost(created.info().nick());
+		Response(socket).rplCreated(created.info().nick());
+		Response(socket).rplMyInfo(created.info().nick());
+		Response(socket).errNoMOTD(created.info().nick());
 		return (true);
 	}
-	pending.send("464 * :Password incorrect");
+	Response(pending).errPasswdMismatch();
 	return (false);
 }
 
@@ -166,4 +167,10 @@ void	IRCServer::quit(const User& user, const std::string& msg)
 			channel->quit(user, msg);
 	}
 	user.socket().close();
+	int			fd(user.socket().fd());
+	std::string	id(user.id());
+	delete _socketClients.at(fd);
+	_socketClients.erase(fd);
+	delete _users.at(id);
+	_users.erase(id);
 }
