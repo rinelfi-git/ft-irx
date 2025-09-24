@@ -11,6 +11,6 @@ bool		isnumber(const std::string& str);
 bool		isLower(char c);
 bool		isUpper(char c);
 bool		isAlpha(char c);
-std::vector<std::string>	ft_split(std::string str, char delimiteur);
+std::vector<std::string>	ft_split(const std::string& str, char delimiteur);
 
 #endif

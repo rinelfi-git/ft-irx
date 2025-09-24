@@ -49,15 +49,16 @@ bool	isAlpha(char c)
 	return (isLower(c) || isUpper(c));
 }
 
-std::vector<std::string>	ft_split(std::string str, char delimiteur)
+std::vector<std::string>	ft_split(const std::string& str, char delimiteur)
 {
-	std::stringstream ss(str);
 	std::vector<std::string> result;
-	std::string item;
+	size_t	start(0), end(0);
 	
-	while (getline(ss, item, delimiteur))
+	while ((end = str.find(delimiteur, start)) != std::string::npos)
 	{
-		result.push_back(item);
+		result.push_back(str.substr(start, end - start));
+		start = end + 1;
 	}
+	result.push_back(str.substr(start));
 	return (result);
 }
