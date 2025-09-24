@@ -30,8 +30,8 @@ IRCServer::IRCServer(const std::string& password):
 
 IRCServer::~IRCServer()
 {
-	std::map<int, ASocketClient*>::iterator	socketClientPtr(_socketClients.begin());
-	std::map<std::string, User*>::iterator	userPtr(_users.begin());
+	std::map<int, ASocketClient*>::iterator		socketClientPtr(_socketClients.begin());
+	std::map<std::string, User*>::iterator		userPtr(_users.begin());
 	std::map<std::string, Channel*>::iterator	channelPtr(_channels.begin());
 
 	while (channelPtr != _channels.end())
@@ -167,4 +167,10 @@ void	IRCServer::quit(const User& user, const std::string& msg)
 			channel->quit(user, msg);
 	}
 	user.socket().close();
+	int			fd(user.socket().fd());
+	std::string	id(user.id());
+	delete _socketClients.at(fd);
+	_socketClients.erase(fd);
+	delete _users.at(id);
+	_users.erase(id);
 }
