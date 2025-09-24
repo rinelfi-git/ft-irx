@@ -26,17 +26,22 @@ void	Channel::message(const Message& msg) const
 	broadcast(msg.toString());
 }
 
-void	Channel::invite(const User& host, const User& guest)
+void	Channel::invite(const User& host, User* guest)
 {
-	(void)host;
-	(void)guest;
+	if (!isOperator(host))
+		return Response(host.socket()).errChanOPrivsNeeded(host.info().nick(), _name);
+	if (isMember(*guest))
+		return Response(host.socket()).errUserOnChannel(host.info().nick(), _name);
+	_inviteds[guest->id()] = guest;
+	Response(host.socket()).rplInviting(host.info().nick(), guest->info().nick(), _name);
+	return guest->socket().send(":" + host.networkId() + " INVITE " + guest->info().nick() + " :" + _name);
 }
 
 void	Channel::setTopic(const User& setter, const std::string& set)
 {
 	if (_mode.isTopicRestricted() && !isOperator(setter))
 	{
-		return Response(setter.socket()).errNotOperator(setter.info().nick(), _name);
+		return Response(setter.socket()).errChanOPrivsNeeded(setter.info().nick(), _name);
 	}
 	_topic = set;
 	broadcast("332 " + setter.info().nick() + " " + _name + " :" + _topic);
@@ -190,8 +195,16 @@ std::string	Channel::modeResume(const std::string& modes) const
 }
 bool	Channel::auth(User* user, const std::string& password)
 {
+	if (_mode.memberLimit() > 0 && _members.size() >= _mode.memberLimit())
+	{
+		Response(user->socket()).errCannotJoinLimited(user->info().nick(), _name);
+		return (false);
+	}
 	if (isInvited(*user))
+	{
+		_inviteds.erase(user->id());
 		return (true);
+	}
 	if (_mode.isInviteOnly() && !isInvited(*user))
 	{
 		Response(user->socket()).errCannotJoinInvite(user->info().nick(), _name);
@@ -202,18 +215,13 @@ bool	Channel::auth(User* user, const std::string& password)
 		Response(user->socket()).errCannotJoinPassword(user->info().nick(), _name);
 		return (false);
 	}
-	if (_mode.memberLimit() > 0 && _members.size() >= _mode.memberLimit())
-	{
-		Response(user->socket()).errCannotJoinLimited(user->info().nick(), _name);
-		return (false);
-	}
 	return (true);
 }
 
 void	Channel::setPassword(const User& setter, const std::string& password)
 {
 	if (!isOperator(setter))
-		return Response(setter.socket()).errNotOperator(setter.info().nick(), _name);
+		return Response(setter.socket()).errChanOPrivsNeeded(setter.info().nick(), _name);
 	_password = password;
 	if (!password.empty())
 		broadcast(":" + setter.networkId() + " MODE " + _name + " +k " + password);
@@ -224,7 +232,7 @@ void	Channel::setPassword(const User& setter, const std::string& password)
 void	Channel::setTopicMode(const User& setter, bool operatorOnly)
 {
 	if (!isOperator(setter))
-		return Response(setter.socket()).errNotOperator(setter.info().nick(), _name);
+		return Response(setter.socket()).errChanOPrivsNeeded(setter.info().nick(), _name);
 	_mode.topicRestricted(operatorOnly);
 	broadcast(":" + setter.networkId() + " MODE " + _name + (operatorOnly ? " +t" : " -t"));
 }
@@ -273,7 +281,7 @@ void	Channel::broadcast(const std::string& msg) const
 void	Channel::kick(const User& op, const User& member , const std::string& message)
 {
 	if (!isOperator(op))
-		return Response(op.socket()).errNotOperator(op.info().nick(), _name);
+		return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
 	if (!isMember(member))
 	{
 		op.socket().send("441 " + op.info().nick() + " " + _name +" " + member.info().nick() + " :They aren't on that channel");
@@ -285,7 +293,7 @@ void	Channel::kick(const User& op, const User& member , const std::string& messa
 void Channel::addOperator(const User& op,  const std::string& user)
 {
     if (!isOperator(op))
-	return Response(op.socket()).errNotOperator(op.info().nick(), _name);
+	return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
     if (!isMember(user))
     {
         op.socket().send("441 " + op.info().nick() + " " + _name +" " + user + " :They aren't on that channel");
@@ -306,7 +314,7 @@ void Channel::addOperator(const User& op,  const std::string& user)
 void Channel::removeOperator(const User& op, const std::string& user)
 {
     if (!isOperator(op))
-		return Response(op.socket()).errNotOperator(op.info().nick(), _name);
+		return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
     if (!isMember(user))
 		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), user, _name);
     if (!isOperator(user))

@@ -43,6 +43,11 @@ void	Response::rplChannelModeIs(const std::string& user, const Channel& channel,
 	_client->send("324 " + user + " " + channel.name() + " :" + channel.modeResume(modes));
 }
 
+void	Response::rplInviting(const std::string& host, const std::string& guest, const std::string& channel) const
+{
+	_client->send("341 " + host + " " + guest + " " + channel);
+}
+
 void	Response::errNoSuchNick(const std::string& user, const std::string& nick) const
 {
 	_client->send("401 " + user + " " + nick + " :No such nick");
@@ -88,6 +93,11 @@ void	Response::errNotOnThatChannel(const std::string& user, const std::string& c
 	_client->send("442 " + user + " " + channel + " :You're not on that channel");
 }
 
+void	Response::errUserOnChannel(const std::string& user, const std::string& channel) const
+{
+	_client->send("443 " + user + " " + channel + " :is already on channel");
+}
+
 void	Response::errNeedMoreParams(const std::string& user, const std::string& command) const
 {
 	_client->send("461 " + user + " " + command + " :Not enough parameters");
@@ -113,7 +123,7 @@ void	Response::errCannotJoinPassword(const std::string& user, const std::string&
 	_client->send("475 " + user + " " + channel + " :Cannot join channel (+k)");
 }
 
-void	Response::errNotOperator(const std::string& user, const std::string& channel) const
+void	Response::errChanOPrivsNeeded(const std::string& user, const std::string& channel) const
 {
 	_client->send("482 " + user + " " + channel + " :You're not channel operator");
 }

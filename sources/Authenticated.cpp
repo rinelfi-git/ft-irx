@@ -142,7 +142,6 @@ void	Authenticated::_parseJoin(const std::string& arg)
 	builder >> name;
 	builder >> password;
 	name_v = ft_split(name, ',');
-	std::cout << "PASSWORD " << password << std::endl;
 	password_v = ft_split(password, ',');
 	while (i < name_v.size())
 	{
@@ -163,7 +162,23 @@ void	Authenticated::_parseJoin(const std::string& arg)
 
 void	Authenticated::_parseInvite(const std::string& arg)
 {
-	(void)arg;
+	std::stringstream	builder(arg);
+	std::string			nick;
+	std::string			channel;
+	Channel*			chan;
+	User*				user;
+
+	builder >> nick;
+	builder >> channel;
+	if (ft_split(arg, ' ').size() != 2)
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "INVITE");
+	chan = IRCServer::getInstance().channel(channel);
+	user = IRCServer::getInstance().user(strToLower(nick));
+	if (!chan)
+		return Response(*this).errNoSuchChannel(_user->info().nick(), channel);
+	if (!user)
+		return Response(*this).errNoSuchNick(_user->info().nick(), nick);
+	chan->invite(*_user, user);
 }
 
 void	Authenticated::_parseTopic(const std::string& arg)
@@ -259,7 +274,7 @@ void Authenticated::_iMode(const std::string& name, char action)
     if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
     if (!channel->isOperator(*_user))
-		return Response(*this).errNotOperator(_user->info().nick(), name);
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	channel->setInviteOnly(_user->networkId(), action == '+');
 }
 
@@ -291,7 +306,7 @@ void	Authenticated::_oMode(const std::string& name, char action, const std::stri
     if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
     if (!channel->isOperator(*_user))
-		return Response(*this).errNotOperator(_user->info().nick(), name);
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 
 	if (action == '+')
 	{
@@ -307,7 +322,7 @@ void	Authenticated::_lMode(const std::string& name, char action, const std::stri
     if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
     if (!channel->isOperator(*_user))
-		return Response(*this).errNotOperator(_user->info().nick(), name);
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 
 	if (action == '+')
 	{
@@ -328,7 +343,7 @@ void	Authenticated::_lMode(const std::string& name, char action)
     if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
     if (!channel->isOperator(*_user))
-		return Response(*this).errNotOperator(_user->info().nick(), name);
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	if (action == '-')
 	{
 		channel->mode().memberLimit(0);

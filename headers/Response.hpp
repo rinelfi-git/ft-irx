@@ -16,7 +16,7 @@ public:
 	void	errNoSuchChannel(const std::string& user, const std::string& channel) const;
 	void	errNeedMoreParams(const std::string& user, const std::string& command) const;
 	void	errNoSuchNick(const std::string& user, const std::string& nick) const;
-	void	errNotOperator(const std::string& user, const std::string& channel) const;
+	void	errChanOPrivsNeeded(const std::string& user, const std::string& channel) const;
 	void	errInvalidLimit(const std::string& user, const std::string& channel) const;
 	void	errEmptyRecipient(const std::string& user) const;
 	void	errEmptyContent(const std::string& user) const;
@@ -24,6 +24,7 @@ public:
 	void	errCannotJoinLimited(const std::string& user, const std::string& channel) const;
 	void	errCannotJoinInvite(const std::string& user, const std::string& channel) const;
 	void	errCannotJoinPassword(const std::string& user, const std::string& channel) const;
+	void	errUserOnChannel(const std::string& user, const std::string& channel) const;
 	void	errNotOnThatChannel(const std::string& op, const std::string& user, const std::string& channel) const;
 	void	errNotOnThatChannel(const std::string& user, const std::string& channel) const;
 	void	errPasswdMismatch(void) const;
@@ -34,5 +35,6 @@ public:
 	void	rplCreated(const std::string& nick) const;
 	void	rplMyInfo(const std::string& nick) const;
 	void	errNoMOTD(const std::string& nick) const;
+	void rplInviting(const std::string& host, const std::string& guest, const std::string& channel) const;
 };
 #endif
