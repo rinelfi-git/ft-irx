@@ -142,6 +142,7 @@ void	Authenticated::_parseJoin(const std::string& arg)
 	builder >> name;
 	builder >> password;
 	name_v = ft_split(name, ',');
+	std::cout << "PASSWORD " << password << std::endl;
 	password_v = ft_split(password, ',');
 	while (i < name_v.size())
 	{
@@ -152,7 +153,7 @@ void	Authenticated::_parseJoin(const std::string& arg)
 			i++;
 			continue;
 		}
-		if (password_v[i] != "x")
+		if (password_v[i] == "x")
 			password_v[i].erase(0, 1);
 		if (channel->auth(_user, password_v[i]))
 			channel->join(_user);
