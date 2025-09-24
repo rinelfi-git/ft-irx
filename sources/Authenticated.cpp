@@ -112,9 +112,9 @@ void Authenticated::_parsePrivMsg(const std::string& arg)
     {
         Channel *channel = IRCServer::getInstance().channel(send_to);
         if (!channel)
-			    return Response(*this).errNoSuchChannel(_user->info().nick(), send_to);
+			return Response(*this).errNoSuchChannel(_user->info().nick(), send_to);
         if (!channel->isMember(*_user))
-			    return Response(*this).errCannotSendToChannel(_user->info().nick(), send_to);
+			return Response(*this).errCannotSendToChannel(_user->info().nick(), send_to);
         channel->broadcast(":" + _user->networkId() + " PRIVMSG " + send_to + " :" + content);
     }
     else
