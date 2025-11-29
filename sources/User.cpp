@@ -47,13 +47,13 @@ bool	User::isNickName(const std::string& str)
 	if (str.empty() || str.length() > 9)
 		return (false);
 	std::string::const_iterator	itStr(str.begin());
-	if (!isAlpha(*itStr) && std::string("[]\\^{}_`").find(*itStr) == std::string::npos)
+	if (!isAlpha(*itStr))
 		return (false);
 	++itStr;
 	for (; itStr != str.end(); itStr++)
 	{
 		char	c(*itStr);
-		if (!std::isalnum(c) && std::string("[]\\^{}_`").find(c) == std::string::npos)
+		if (!std::isalnum(c) && std::string("-[]\\`^{}").find(c) == std::string::npos)
 			return (false);
 	}
 	return (true);

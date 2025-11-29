@@ -47,7 +47,7 @@ void	ASocketClient::input(const std::string& data)
 			size_t	length(lineFeed);
 			if (hasCarriageReturn)
 				length--;
-			std::string	index(_buffer.substr(0, length));
+			std::string	index(strToLower(_buffer.substr(0, length)));
 			if (!index.empty())
 			{
 				cmds[index] = "";
