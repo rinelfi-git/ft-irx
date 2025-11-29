@@ -24,6 +24,7 @@ class IRCServer: public ASocketServerObserver
 		static void	_sigint(int num);
         public:
         static IRCServer& getInstance(void);
+        static const std::string serverName;
         IRCServer(const std::string& password);
         ~IRCServer();
         bool			auth(const Pending& pending);

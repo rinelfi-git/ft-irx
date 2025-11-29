@@ -26,18 +26,16 @@ SocketServer::SocketServer(int port):
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons(port);
-	if (_fd == -1
-			|| setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof(sockopt)) == -1
-			|| fcntl(_fd, F_SETFL, O_NONBLOCK) == -1
-			|| bind(_fd, (const struct sockaddr *)&address, sizeof(address)) == -1
-			|| listen(_fd, 42) == -1)
-	{
-		std::stringstream builder;
-		builder << "Socket initiation error : " << std::strerror(errno) << '.';
-		std::string error;
-		std::getline(builder, error);
-		throw std::runtime_error(error);
-	}
+	if (_fd == -1)
+		throw std::runtime_error("Socket creation error : " + std::string(std::strerror(errno)));
+	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &sockopt, sizeof(sockopt)) == -1)
+		throw std::runtime_error("Setsockopt error : " + std::string(std::strerror(errno)));
+	if (fcntl(_fd, F_SETFL, O_NONBLOCK) == -1)
+		throw std::runtime_error("Fcntl error : " + std::string(std::strerror(errno)));
+	if (bind(_fd, (const struct sockaddr *)&address, sizeof(address)) == -1)
+		throw std::runtime_error("Bind error : " + std::string(std::strerror(errno)));
+	if (listen(_fd, 42) == -1)
+		throw std::runtime_error("Listen error : " + std::string(std::strerror(errno)));
 	struct pollfd serverPoll;
 	serverPoll.fd = _fd;
 	serverPoll.events = POLLIN;

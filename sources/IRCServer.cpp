@@ -14,6 +14,7 @@
 #include <csignal>
 
 IRCServer* IRCServer::_instance = NULL;
+const std::string IRCServer::serverName = "ft_irx";
 
 IRCServer::IRCServer(const std::string& password):
 	ASocketServerObserver(),

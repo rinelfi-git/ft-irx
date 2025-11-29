@@ -51,7 +51,7 @@ void	ASocketClient::input(const std::string& data)
 			if (!index.empty())
 			{
 				cmds[index] = "";
-				std::cout << IN_COLOR << "(" << index << ") EMPTY PARAMETER" << std::endl << DEFAULT_COLOR;
+				std::cout << IN_COLOR << '{' << _fd << "} (" << index << ") EMPTY PARAMETER" << std::endl << DEFAULT_COLOR;
 			}
 			_buffer = _buffer.substr(lineFeed + 1);
 		}
@@ -67,7 +67,7 @@ void	ASocketClient::input(const std::string& data)
 			{
 				std::string value(_buffer.substr(offset, length));
 				cmds[index] = value;
-				std::cout << IN_COLOR << "(" << index << ")[" << value << "]" << std::endl << DEFAULT_COLOR;
+				std::cout << IN_COLOR << '{' << _fd << "} (" << index << ")[" << value << "]" << std::endl << DEFAULT_COLOR;
 			}
 			_buffer = _buffer.substr(lineFeed + 1);
 		}

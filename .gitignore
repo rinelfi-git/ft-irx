@@ -2,4 +2,4 @@
 .vscode/*
 /ircserv
 */**/*.o
-CLAUDE.md
+*.md

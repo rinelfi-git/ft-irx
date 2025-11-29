@@ -49,6 +49,8 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 
 void	Pending::_parseNick(const std::string& in)
 {
+	if (in.empty())
+		return Response(*this).errNoNicknameGiven("*");
 	if (_currentStep == 0)
 		return Response(*this).errPasswdMismatch();
 	if (!User::isNickName(in))
@@ -62,6 +64,8 @@ void	Pending::_parseNick(const std::string& in)
 
 void	Pending::_parsePass(const std::string& in)
 {
+	if (in.empty())
+		return Response(*this).errNeedMoreParams("*", "PASS");
 	_password = in;
 	_currentStep++;
 }
@@ -75,8 +79,10 @@ void	Pending::_parseUser(const std::string& in)
 	std::string			realname;
 	char				ddot;
 
-	if (_currentStep <= 1)
+	if (_currentStep == 0)
 		return Response(*this).errPasswdMismatch();
+	if (_currentStep == 1)
+		return Response(*this).errNotRegistered("*");
 	builder >> uname;
 	builder >> host;
 	builder >> server;
