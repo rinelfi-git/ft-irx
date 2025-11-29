@@ -44,8 +44,8 @@ public:
 	static bool			isChannelName(const std::string& str);
 	void				broadcast(const std::string& msg) const;
 	void				kick(const User& op, const User& member, const std::string& message);
-	void 				addOperator(const User& op,  const std::string& user);
-	void				removeOperator(const User& op, const std::string& user);
+	void 				addOperator(const User& op, const User& target);
+	void				removeOperator(const User& op, const User& target);
 	void				setInviteOnly(const std::string& user, bool set);
 };
 #endif

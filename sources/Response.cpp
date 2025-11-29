@@ -28,7 +28,7 @@ void	Response::rplCreated(const std::string& nick) const
 
 void	Response::rplMyInfo(const std::string& nick) const
 {
-	_client->send(":" + IRCServer::serverName + " 004 " + nick + " ft_irc homemade-0.1  o,k,l,it");
+	_client->send(":" + IRCServer::serverName + " 004 " + nick + " ft_irc homemade-0.1  oiklt");
 }
 
 void	Response::errNoMOTD(const std::string& nick) const
@@ -78,12 +78,12 @@ void	Response::errEmptyContent(const std::string& user) const
 
 void	Response::errErrOneusNickname(const std::string& nick) const
 {
-	_client->send(":" + IRCServer::serverName + " 432 " + nick + " :Erroneus nickname");
+	_client->send(":" + IRCServer::serverName + " 432 * " + nick + " :Erroneous nickname");
 }
 
 void	Response::errNicknameInUse(const std::string& nick) const
 {
-	_client->send(":" + IRCServer::serverName + " 433 " + nick + " :Nickname is already in use");
+	_client->send(":" + IRCServer::serverName + " 433 * " + nick + " :Nickname is already in use");
 }
 
 void	Response::errNotOnThatChannel(const std::string& op, const std::string& user, const std::string& channel) const

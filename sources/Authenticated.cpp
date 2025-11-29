@@ -50,13 +50,15 @@ void	Authenticated::_parseMode(const std::string& arg)
 	withParameter["+o"] = &Authenticated::_oMode;
 	withParameter["+l"] = &Authenticated::_lMode;
 
-	Channel*	channel(IRCServer::getInstance().channel(name));
+	if (name.empty())
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 	if (User::isNickName(name))
 		return ;
+	if (!Channel::isChannelName(name))
+		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
+	Channel*	channel(IRCServer::getInstance().channel(name));
 	if (!channel)
-		return;
-	if (Channel::isChannelName(name) && !channel)
-		return	Response(*this).errNoSuchChannel(_user->info().nick(), name);
+		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
 	if (modes.empty())
 		return Response(*this).rplChannelModeIs(_user->info().nick(), *channel);
 	else if (modes.at(0) != '+' && modes.at(0) != '-')
@@ -98,15 +100,17 @@ void Authenticated::_parsePrivMsg(const std::string& arg)
 {
     std::stringstream ss(arg);
     std::string send_to, content;
-    
+
     ss >> send_to;
-    getline(ss, content);
-    content = content.substr(1);
-    
     if (send_to.empty())
 		return Response(*this).errEmptyRecipient(_user->info().nick());
-    if (content.empty())
+    std::getline(ss, content);
+    if (content.length() > 1)
+        content = content.substr(1);
+    if (content.empty() || (content.length() == 1 && content[0] == ':'))
 		return Response(*this).errEmptyContent(_user->info().nick());
+    if (content[0] == ':')
+        content = content.substr(1);
     
     if (Channel::isChannelName(send_to))
     {
@@ -140,11 +144,19 @@ void	Authenticated::_parseJoin(const std::string& arg)
 	size_t i = 0;
 
 	builder >> name;
+	if (name.empty())
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "JOIN");
 	builder >> password;
 	name_v = ft_split(name, ',');
 	password_v = ft_split(password, ',');
 	while (i < name_v.size())
 	{
+		if (!Channel::isChannelName(name_v[i]))
+		{
+			Response(*this).errNoSuchChannel(_user->info().nick(), name_v[i]);
+			i++;
+			continue;
+		}
 		Channel *channel = IRCServer::getInstance().channel(name_v[i]);
 		if (!channel)
 		{
@@ -152,9 +164,10 @@ void	Authenticated::_parseJoin(const std::string& arg)
 			i++;
 			continue;
 		}
-		if (password_v[i] == "x")
+		if (i < password_v.size() && password_v[i] == "x")
 			password_v[i].erase(0, 1);
-		if (channel->auth(_user, password_v[i]))
+		std::string pwd = (i < password_v.size()) ? password_v[i] : "";
+		if (channel->auth(_user, pwd))
 			channel->join(_user);
 		i++;
 	}
@@ -189,8 +202,16 @@ void	Authenticated::_parseTopic(const std::string& arg)
 	Channel*			channel;
 
 	builder >> name;
-	std::getline(builder, topic);
+	if (name.empty())
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "TOPIC");
 	channel = IRCServer::getInstance().channel(name);
+	if (!channel)
+		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	std::getline(builder, topic);
+	if (topic.empty() || topic.find(':') == std::string::npos)
+		return channel->getTopic(*_user);
 	channel->setTopic(*_user, topic.substr(topic.find(':') + 1));
 }
 
@@ -255,12 +276,17 @@ void	Authenticated::_parseKick(const std::string& arg)
 
 	ss >> channelName;
 	ss >> nickUser;
+	if (channelName.empty() || nickUser.empty())
+		return Response(*this).errNeedMoreParams(_user->info().nick(), "KICK");
 	std::getline(ss, message);
 	channel = IRCServer::getInstance().channel(channelName);
+	if (!channel)
+		return Response(*this).errNoSuchChannel(_user->info().nick(), channelName);
 	member = IRCServer::getInstance().user(nickUser);
 	if (!member)
 		return Response(*this).errNoSuchNick(_user->info().nick(), nickUser);
-	channel->kick(*_user, *member, message.substr(message.find(':')));
+	std::string kickMsg = message.empty() ? ":" + _user->info().nick() : message.substr(message.find(':'));
+	channel->kick(*_user, *member, kickMsg);
 }
 
 void	Authenticated::_parseQuit(const std::string& arg)
@@ -270,10 +296,12 @@ void	Authenticated::_parseQuit(const std::string& arg)
 
 void Authenticated::_iMode(const std::string& name, char action)
 {
-    Channel* channel = IRCServer::getInstance().channel(name);
-    if (!channel)
+	Channel* channel = IRCServer::getInstance().channel(name);
+	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
-    if (!channel->isOperator(*_user))
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
 		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	channel->setInviteOnly(_user->networkId(), action == '+');
 }
@@ -281,19 +309,25 @@ void Authenticated::_iMode(const std::string& name, char action)
 
 void	Authenticated::_tMode(const std::string& name, char action)
 {
-	Channel*	channel(IRCServer::getInstance().channel(name));
-
+	Channel* channel = IRCServer::getInstance().channel(name);
 	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	channel->setTopicMode(*_user, action == '+');
 }
 
 void	Authenticated::_kMode(const std::string& name, char action, const std::string& password)
 {
-	Channel*	channel(IRCServer::getInstance().channel(name));
-
+	Channel* channel = IRCServer::getInstance().channel(name);
 	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
+		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	if (action == '+')
 		channel->setPassword(*_user, password);
 	else
@@ -302,26 +336,33 @@ void	Authenticated::_kMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_oMode(const std::string& name, char action, const std::string& user)
 {
-	 Channel* channel = IRCServer::getInstance().channel(name);
-    if (!channel)
+	Channel* channel = IRCServer::getInstance().channel(name);
+	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
-    if (!channel->isOperator(*_user))
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
 		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
+	User* target = IRCServer::getInstance().user(strToLower(user));
+	if (!target)
+		return Response(*this).errNoSuchNick(_user->info().nick(), user);
+	if (!channel->isMember(*target))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), target->info().nick(), name);
 
 	if (action == '+')
-	{
-		channel->addOperator(*_user, user);
-	}
+		channel->addOperator(*_user, *target);
 	else
-		channel->removeOperator(*_user, user);
+		channel->removeOperator(*_user, *target);
 }
 
 void	Authenticated::_lMode(const std::string& name, char action, const std::string& limit)
 {
-	 Channel* channel = IRCServer::getInstance().channel(name);
-    if (!channel)
+	Channel* channel = IRCServer::getInstance().channel(name);
+	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
-    if (!channel->isOperator(*_user))
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
 		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 
 	if (action == '+')
@@ -329,8 +370,8 @@ void	Authenticated::_lMode(const std::string& name, char action, const std::stri
 		if (limit.empty())
 			return Response(*this).errNeedMoreParams(_user->info().nick(), "MODE");
 		int limitValue = 0;
-        std::stringstream ss(limit);
-        if (!(ss >> limitValue) || limitValue <= 0)
+		std::stringstream ss(limit);
+		if (!(ss >> limitValue) || limitValue <= 0)
 			return Response(*this).errInvalidLimit(_user->info().nick(), "MODE");
 		channel->mode().memberLimit(limitValue);
 		channel->broadcast(":" + _user->networkId() + " MODE " + name + " +l " + limit);
@@ -339,10 +380,12 @@ void	Authenticated::_lMode(const std::string& name, char action, const std::stri
 
 void	Authenticated::_lMode(const std::string& name, char action)
 {
-	 Channel* channel = IRCServer::getInstance().channel(name);
-    if (!channel)
+	Channel* channel = IRCServer::getInstance().channel(name);
+	if (!channel)
 		return Response(*this).errNoSuchChannel(_user->info().nick(), name);
-    if (!channel->isOperator(*_user))
+	if (!channel->isMember(*_user))
+		return Response(*this).errNotOnThatChannel(_user->info().nick(), name);
+	if (!channel->isOperator(*_user))
 		return Response(*this).errChanOPrivsNeeded(_user->info().nick(), name);
 	if (action == '-')
 	{

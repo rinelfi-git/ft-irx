@@ -28,6 +28,8 @@ void	Channel::message(const Message& msg) const
 
 void	Channel::invite(const User& host, User* guest)
 {
+	if (!isMember(host))
+		return Response(host.socket()).errNotOnThatChannel(host.info().nick(), _name);
 	if (!isOperator(host))
 		return Response(host.socket()).errChanOPrivsNeeded(host.info().nick(), _name);
 	if (isMember(*guest))
@@ -278,49 +280,33 @@ void	Channel::broadcast(const std::string& msg) const
 		(itMember++)->second->socket().send(msg);
 }
 
-void	Channel::kick(const User& op, const User& member , const std::string& message)
+void	Channel::kick(const User& op, const User& member, const std::string& message)
 {
+	if (!isMember(op))
+		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), _name);
 	if (!isOperator(op))
 		return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
 	if (!isMember(member))
-	{
-		op.socket().send("441 " + op.info().nick() + " " + _name +" " + member.info().nick() + " :They aren't on that channel");
-		return ;
-	}
-	broadcast(":" + op.networkId() + " KICK " + _name +" " + member.info().nick() + " " + message);
+		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), member.info().nick(), _name);
+	broadcast(":" + op.networkId() + " KICK " + _name + " " + member.info().nick() + " " + message);
 	_members.erase(member.id());
+	_operators.erase(member.id());
 }
-void Channel::addOperator(const User& op,  const std::string& user)
+void Channel::addOperator(const User& op, const User& target)
 {
-    if (!isOperator(op))
-	return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
-    if (!isMember(user))
-    {
-        op.socket().send("441 " + op.info().nick() + " " + _name +" " + user + " :They aren't on that channel");
-        return;
-    }
-    if (isOperator(user))
-        return;
-    std::map<std::string, User*>::iterator it = _members.find(user);
-    if (it != _members.end())
-    {
-        _operators[user] = it->second;
-        
-        std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " +o " + user;
-        broadcast(modeMsg);
-    }
+	if (isOperator(target))
+		return;
+	_operators[target.id()] = const_cast<User*>(&target);
+	std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " +o " + target.info().nick();
+	broadcast(modeMsg);
 }
 
-void Channel::removeOperator(const User& op, const std::string& user)
+void Channel::removeOperator(const User& op, const User& target)
 {
-    if (!isOperator(op))
-		return Response(op.socket()).errChanOPrivsNeeded(op.info().nick(), _name);
-    if (!isMember(user))
-		return Response(op.socket()).errNotOnThatChannel(op.info().nick(), user, _name);
-    if (!isOperator(user))
+	if (!isOperator(target))
 		return;
-	_operators.erase(user);
-	std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " -o " + user;
+	_operators.erase(target.id());
+	std::string modeMsg = ":" + op.info().nick() + " MODE " + _name + " -o " + target.info().nick();
 	broadcast(modeMsg);
 }
 
