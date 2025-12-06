@@ -5,6 +5,7 @@
 # include <string>
 # include <map>
 # include <vector>
+# include <exception>
 
 class	Pending: public ASocketClient
 {
@@ -23,6 +24,11 @@ public:
 	Pending(int fd);
 	~Pending();
 	bool	auth(void);
+	class	PassMismatchException: public std::exception
+	{
+	public:
+		virtual const char* what(void) const throw();
+	};
 	const std::string&	password(void) const;
 	const UserInfo&	userInfo(void) const;
 	const std::string&	id(void) const;

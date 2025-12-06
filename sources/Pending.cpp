@@ -21,13 +21,16 @@ Pending::Pending(int fd):
 Pending::~Pending()
 {}
 
+const char* Pending::PassMismatchException::what(void) const throw()
+{
+	return ("Password mismatch.");
+}
+
 bool	Pending::auth(void)
 {
 	if (!_userInfo.complete())
 		return (false);
 	bool	auth(IRCServer::getInstance().auth(*this));
-	if (!auth)
-		_currentStep = 0;
 	return auth;
 }
 
@@ -51,8 +54,8 @@ void	Pending::_parseNick(const std::string& in)
 {
 	if (in.empty())
 		return Response(*this).errNoNicknameGiven("*");
-	if (_currentStep == 0)
-		return ;
+	if (_currentStep == 0 && !_userInfo.complete())
+		return Response(*this).errPasswdMismatch();
 	if (!User::isNickName(in))
 		return Response(*this).errErrOneusNickname(in);
 	if (IRCServer::getInstance().user(strToLower(in)))
@@ -79,8 +82,8 @@ void	Pending::_parseUser(const std::string& in)
 	std::string			realname;
 	char				ddot;
 
-	if (_currentStep == 0)
-		return ;
+	if (_currentStep == 0 && !_userInfo.complete())
+		return Response(*this).errPasswdMismatch();
 	if (_currentStep == 1)
 		return Response(*this).errNotRegistered("*");
 	builder >> uname;

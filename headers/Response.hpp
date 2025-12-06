@@ -37,6 +37,7 @@ public:
 	void	errNoMOTD(const std::string& nick) const;
 	void	errNotRegistered(const std::string& user) const;
 	void	errNoNicknameGiven(const std::string& user) const;
-	void rplInviting(const std::string& host, const std::string& guest, const std::string& channel) const;
+	void	rplInviting(const std::string& host, const std::string& guest, const std::string& channel) const;
+	void	errAlreadyRegistered(void) const;
 };
 #endif

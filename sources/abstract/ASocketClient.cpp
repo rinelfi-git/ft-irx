@@ -28,11 +28,13 @@ void	ASocketClient::send(const std::string& data) const
 	}
 }
 
-void	ASocketClient::input(const std::string& data)
+bool	ASocketClient::input(const std::string& data)
 {
+	if (data.empty() || data.find('\r') == 0 || data.find('\n') == 0)
+		return (false);
+	
 	_buffer += data;
 	std::map<std::string, std::string>	cmds;
-
 	while (!_buffer.empty())
 	{
 		size_t	space(_buffer.find(' '));
@@ -73,6 +75,7 @@ void	ASocketClient::input(const std::string& data)
 		}
 	}
 	parse(cmds);
+	return (true);
 }
 
 int	ASocketClient::fd(void) const

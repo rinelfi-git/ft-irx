@@ -407,6 +407,8 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 	actions["kick"] = &Authenticated::_parseKick;
 	actions["quit"] = &Authenticated::_parseQuit;
 	actions["part"] = &Authenticated::_parsePart;
+	actions["pass"] = &Authenticated::_parseRegister;
+	actions["user"] = &Authenticated::_parseRegister;
 
 	std::map<std::string, void (Authenticated::*)(const std::string&)>::iterator	actionPtr(actions.begin());
 	while (actionPtr != actions.end())
@@ -415,6 +417,12 @@ void	Authenticated::parse(const std::map<std::string, std::string>& cmds)
 		if (cmdPtr != cmds.end())
 			(this->*actions.at(cmdPtr->first))(cmdPtr->second);
 	}
+}
+
+void	Authenticated::_parseRegister(const std::string& arg)
+{
+	(void)arg;
+	return Response(*this).errAlreadyRegistered();
 }
 
 User*	Authenticated::user(void) const

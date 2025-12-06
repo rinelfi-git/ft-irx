@@ -103,8 +103,16 @@ void	IRCServer::onData(int fd, const std::string& data)
 	if (dynamic_cast<Pending*>(socketClientPtr->second))
 	{
 		Pending*	pending(dynamic_cast<Pending*>(socketClientPtr->second));
-		pending->input(data);
-		pending->auth();
+		if (pending->input(data)){
+			try {
+				pending->auth();
+			} catch (const Pending::PassMismatchException&){
+				pending->close();
+				int	fd(pending->fd());
+				delete _socketClients.at(fd);
+				_socketClients.erase(fd);
+			}
+		}
 	}
 	else if (dynamic_cast<Authenticated*>(socketClientPtr->second))
 	{

@@ -145,3 +145,8 @@ void	Response::errNoNicknameGiven(const std::string& user) const
 {
 	_client->send(":" SERVER_NAME " 431 " + user + " :No nickname given");
 }
+
+void	Response::errAlreadyRegistered(void) const
+{
+	_client->send(":" SERVER_NAME " 462 :You may not reregister");
+}

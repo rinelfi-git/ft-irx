@@ -27,6 +27,7 @@ private:
 	void	_oMode(const std::string& name, char action, const std::string& user);
 	void	_lMode(const std::string& name, char action, const std::string& limit);
 	void	_lMode(const std::string& name, char action);
+	void	_parseRegister(const std::string& arg);
 protected:
 	virtual void	parse(const std::map<std::string, std::string>& cmds);
 public:
