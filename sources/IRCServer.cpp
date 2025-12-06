@@ -111,6 +111,7 @@ void	IRCServer::onData(int fd, const std::string& data)
 				int	fd(pending->fd());
 				delete _socketClients.at(fd);
 				_socketClients.erase(fd);
+				std::cout << "closing : " << fd << std::endl;
 			}
 		}
 	}

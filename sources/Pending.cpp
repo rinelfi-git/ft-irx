@@ -31,6 +31,8 @@ bool	Pending::auth(void)
 	if (!_userInfo.complete())
 		return (false);
 	bool	auth(IRCServer::getInstance().auth(*this));
+	if (!auth)
+		throw (Pending::PassMismatchException());
 	return auth;
 }
 
