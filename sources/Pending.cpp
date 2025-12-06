@@ -9,7 +9,6 @@
 #include <map>
 #include <sstream>
 #include <vector>
-#include <iostream>
 
 Pending::Pending(int fd):
 	ASocketClient(fd),
@@ -44,16 +43,12 @@ void	Pending::parse(const std::map<std::string, std::string>& cmds)
 	{
 		std::map<std::string, std::string>::const_iterator	cmdPtr(cmds.find(actions[i].first));
 		if (cmdPtr != cmds.end())
-		{
-			std::cout << "execute : " << cmdPtr->first << std::endl;
 			(this->*actions[i].second)(cmdPtr->second);
-		}
 	}
 }
 
 void	Pending::_parseNick(const std::string& in)
 {
-	std::cout << "nick STEP " << _currentStep << std::endl;
 	if (in.empty())
 		return Response(*this).errNoNicknameGiven("*");
 	if (_currentStep == 0)
@@ -69,7 +64,6 @@ void	Pending::_parseNick(const std::string& in)
 
 void	Pending::_parsePass(const std::string& in)
 {
-	std::cout << "PASS STEP " << _currentStep << std::endl;
 	if (in.empty())
 		return Response(*this).errNeedMoreParams("*", "PASS");
 	_password = in;
@@ -85,13 +79,10 @@ void	Pending::_parseUser(const std::string& in)
 	std::string			realname;
 	char				ddot;
 
-	std::cout << "USER STEP " << _currentStep << std::endl;
 	if (_currentStep == 0)
 		return ;
-	std::cout << "JUMP 1" << std::endl;
 	if (_currentStep == 1)
 		return Response(*this).errNotRegistered("*");
-	std::cout << "JUMP 2" << std::endl;
 	builder >> uname;
 	builder >> host;
 	builder >> server;
@@ -105,7 +96,6 @@ void	Pending::_parseUser(const std::string& in)
 		.server(server)
 		.realname(realname);
 	_currentStep++;
-	std::cout << "JUMP 3" << std::endl;
 }
 
 void	Pending::_parseCap(const std::string& in)
